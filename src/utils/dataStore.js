@@ -1,0 +1,172 @@
+export const initializeStore = () => {
+  if (typeof window === "undefined") return;
+  const initialized = localStorage.getItem("erp_initialized_v2");
+  if (!initialized) {
+    const defaultData = {
+      master: [
+        { id: "1", styleCode: "TS-001", category: "T-Shirt", season: "Summer 2026" },
+        { id: "2", styleCode: "TP-002", category: "Track Pant", season: "Winter 2026" },
+        { id: "3", styleCode: "HD-003", category: "Hoodie", season: "Winter 2026" },
+        { id: "4", styleCode: "JK-004", category: "Jacket", season: "Spring 2026" }
+      ],
+      fabric: [
+        { id: "1", name: "100% Cotton Single Jersey", type: "Knit", quantity: "5000", unit: "Kgs", cost: "4.50" },
+        { id: "2", name: "Fleece 300 GSM", type: "Knit", quantity: "2500", unit: "Kgs", cost: "5.20" },
+        { id: "3", name: "Denim 12oz", type: "Woven", quantity: "8000", unit: "Yards", cost: "3.80" },
+        { id: "4", name: "Polyester Mesh", type: "Knit", quantity: "1500", unit: "Meters", cost: "2.10" }
+      ],
+      accessories: [
+        { id: "1", name: "Care Label", category: "Labels", quantity: "15000", unit: "Pcs", cost: "0.05" },
+        { id: "2", name: "YKK Zipper 8 inch", category: "Fasteners", quantity: "5000", unit: "Pcs", cost: "0.20" },
+        { id: "3", name: "Drawcord 1.2m", category: "Trims", quantity: "10000", unit: "Pcs", cost: "0.15" },
+        { id: "4", name: "Polybag 10x12", category: "Packaging", quantity: "20000", unit: "Pcs", cost: "0.10" }
+      ],
+      bom: [
+        { id: "1", style: "TS-001", fabric: "100% Cotton Single Jersey", fabricConsumption: "0.25", accessory: "Care Label", accConsumption: "1" },
+        { id: "2", style: "HD-003", fabric: "Fleece 300 GSM", fabricConsumption: "0.80", accessory: "Drawcord 1.2m", accConsumption: "1" },
+        { id: "3", style: "JK-004", fabric: "Denim 12oz", fabricConsumption: "1.50", accessory: "YKK Zipper 8 inch", accConsumption: "1" }
+      ],
+      costing: [
+        { id: "1", styleCode: "TS-001", totalCost: "1.15" },
+        { id: "2", styleCode: "TP-002", totalCost: "2.50" },
+        { id: "3", styleCode: "HD-003", totalCost: "4.30" }
+      ],
+      sales: [
+        { id: "1", orderId: "ORD-1001", buyer: "FashionCorp", qty: "10000", deliveryDate: "2026-10-15", status: "Confirmed" },
+        { id: "2", orderId: "ORD-1002", buyer: "StyleBrands", qty: "5000", deliveryDate: "2026-11-01", status: "In Production" },
+        { id: "3", orderId: "ORD-1003", buyer: "GlobalRetail", qty: "15000", deliveryDate: "2026-12-10", status: "Pending Material" }
+      ],
+      mrp: [
+        { id: "1", planId: "MRP-26-01", status: "Approved" },
+        { id: "2", planId: "MRP-26-02", status: "Draft" },
+        { id: "3", planId: "MRP-26-03", status: "Pending Approval" }
+      ],
+      cutting: [
+        { id: "1", jobId: "CUT-1001", cutQty: "5000" },
+        { id: "2", jobId: "CUT-1002", cutQty: "2500" },
+        { id: "3", jobId: "CUT-1003", cutQty: "10000" }
+      ],
+      bundle: [
+        { id: "1", bundleId: "BND-001-M", size: "M", pcs: "50" },
+        { id: "2", bundleId: "BND-001-L", size: "L", pcs: "50" },
+        { id: "3", bundleId: "BND-002-S", size: "S", pcs: "30" }
+      ],
+      stitching: [
+        { id: "1", lineNo: "Line 1", outputQty: "1200" },
+        { id: "2", lineNo: "Line 2", outputQty: "850" },
+        { id: "3", lineNo: "Line 4", outputQty: "2100" }
+      ],
+      quality: [
+        { id: "1", inspectionId: "QC-1001", passQty: "1150", failQty: "50" },
+        { id: "2", inspectionId: "QC-1002", passQty: "840", failQty: "10" },
+        { id: "3", inspectionId: "QC-1003", passQty: "2000", failQty: "100" }
+      ],
+      packing: [
+        { id: "1", cartonNo: "CRT-1001-001", contents: "TS-001 (M) x 50" },
+        { id: "2", cartonNo: "CRT-1001-002", contents: "TS-001 (L) x 50" },
+        { id: "3", cartonNo: "CRT-1002-001", contents: "HD-003 (S) x 20" }
+      ],
+      dispatch: [
+        { id: "1", invoiceNo: "INV-26-001", destination: "New York Hub" },
+        { id: "2", invoiceNo: "INV-26-002", destination: "London DC" },
+        { id: "3", invoiceNo: "INV-26-003", destination: "Tokyo Retail" }
+      ],
+      finished: [
+        { id: "1", style: "TS-001", totalStock: "15000" },
+        { id: "2", style: "TP-002", totalStock: "8000" },
+        { id: "3", style: "JK-004", totalStock: "4500" }
+      ],
+      jobwork: [
+        { id: "1", challanNo: "CH-26-001", contractor: "ABC Dyeing" },
+        { id: "2", challanNo: "CH-26-002", contractor: "XYZ Embroidery" },
+        { id: "3", challanNo: "CH-26-003", contractor: "Super Wash" }
+      ],
+      planning: [
+        { id: "1", planId: "PLN-1001", startDate: "2026-09-20" },
+        { id: "2", planId: "PLN-1002", startDate: "2026-10-05" },
+        { id: "3", planId: "PLN-1003", startDate: "2026-10-15" }
+      ],
+      purchase: [
+        { id: "1", poNumber: "PO-26-001", vendor: "TexMill Fabrics", amount: "25000" },
+        { id: "2", poNumber: "PO-26-002", vendor: "YKK Fasteners", amount: "1000" },
+        { id: "3", poNumber: "PO-26-003", vendor: "Global Trims", amount: "4500" }
+      ],
+      finishing: [
+        { id: "1", batchId: "FIN-1001", status: "Washing" },
+        { id: "2", batchId: "FIN-1002", status: "Ironing" },
+        { id: "3", batchId: "FIN-1003", status: "Folded" }
+      ],
+      matrix: [
+        { id: "1", styleCode: "TS-001", color: "Navy Blue", size: "M" },
+        { id: "2", styleCode: "TS-001", color: "Navy Blue", size: "L" },
+        { id: "3", styleCode: "HD-003", color: "Heather Grey", size: "XL" }
+      ]
+    };
+
+    localStorage.setItem("erp_data", JSON.stringify(defaultData));
+    localStorage.setItem("erp_initialized_v2", "true");
+  }
+};
+
+export const getRecords = (moduleName) => {
+  if (typeof window === "undefined") return [];
+  const rawData = localStorage.getItem("erp_data");
+  if (!rawData) return [];
+  const data = JSON.parse(rawData);
+  return data[moduleName] || [];
+};
+
+export const getAllData = () => {
+  if (typeof window === "undefined") return {};
+  const rawData = localStorage.getItem("erp_data");
+  if (!rawData) return {};
+  return JSON.parse(rawData);
+};
+
+export const addRecord = (moduleName, record) => {
+  if (typeof window === "undefined") return null;
+  const rawData = localStorage.getItem("erp_data");
+  let data = rawData ? JSON.parse(rawData) : {};
+  
+  if (!data[moduleName]) {
+    data[moduleName] = [];
+  }
+  
+  const newRecord = { 
+    id: Date.now().toString() + Math.random().toString(36).substr(2, 5), 
+    ...record 
+  };
+  
+  data[moduleName].push(newRecord);
+  localStorage.setItem("erp_data", JSON.stringify(data));
+  return newRecord;
+};
+
+export const updateRecord = (moduleName, id, updatedRecord) => {
+  if (typeof window === "undefined") return null;
+  const rawData = localStorage.getItem("erp_data");
+  if (!rawData) return null;
+  
+  let data = JSON.parse(rawData);
+  if (!data[moduleName]) return null;
+
+  const index = data[moduleName].findIndex(r => r.id === id);
+  if (index === -1) return null;
+
+  data[moduleName][index] = { ...data[moduleName][index], ...updatedRecord };
+  localStorage.setItem("erp_data", JSON.stringify(data));
+  return data[moduleName][index];
+};
+
+export const deleteRecord = (moduleName, id) => {
+  if (typeof window === "undefined") return false;
+  const rawData = localStorage.getItem("erp_data");
+  if (!rawData) return false;
+  
+  let data = JSON.parse(rawData);
+  if (!data[moduleName]) return false;
+
+  data[moduleName] = data[moduleName].filter(r => r.id !== id);
+  localStorage.setItem("erp_data", JSON.stringify(data));
+  return true;
+};

@@ -1,18 +1,27 @@
 "use client";
 
-export default function Dashboard() {
-  const kpis = [
-    { title: "Production vs Target", value: "85%", icon: "monitoring", change: "+5%" },
-    { title: "Line Efficiency", value: "78%", icon: "speed", change: "-2%" },
-    { title: "Order Fulfilment", value: "92%", icon: "task_alt", change: "+1%" },
-    { title: "Pending Dispatch", value: "1,240", icon: "pending_actions", change: "+45" },
-  ];
+import { useEffect, useState } from "react";
+import { getAllData } from "@/utils/dataStore";
 
-  const recentOrders = [
-    { id: "ORD-001", style: "Crew Neck T-Shirt", qty: 5000, status: "In Production" },
-    { id: "ORD-002", style: "Fleece Track Pant", qty: 2500, status: "Cutting" },
-    { id: "ORD-003", style: "Cotton Innerwear", qty: 10000, status: "Pending Material" },
-    { id: "ORD-004", style: "V-Neck T-Shirt", qty: 3000, status: "Finished Goods" },
+export default function Dashboard() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    setData(getAllData());
+  }, []);
+
+  if (!data) return null;
+
+  const totalStyles = (data.master || []).length;
+  const totalSalesQty = (data.sales || []).reduce((acc, curr) => acc + Number(curr.qty || 0), 0);
+  const totalFabrics = (data.fabric || []).length;
+  const recentOrders = data.sales || [];
+
+  const kpis = [
+    { title: "Active Styles", value: totalStyles.toString(), icon: "checkroom", change: "Live" },
+    { title: "Total Ordered Qty", value: totalSalesQty.toLocaleString(), icon: "shopping_cart", change: "Units" },
+    { title: "Fabric Types in Stock", value: totalFabrics.toString(), icon: "inventory_2", change: "Live" },
+    { title: "Order Fulfilment", value: "92%", icon: "task_alt", change: "+1%" },
   ];
 
   return (
@@ -64,44 +73,44 @@ export default function Dashboard() {
           <h2 style={{ fontSize: '1.8rem', fontWeight: '400', margin: 0 }}>Recent Orders</h2>
         </div>
         <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Style Description</th>
-                <th>Quantity</th>
-                <th>Status</th>
-                <th style={{ textAlign: 'right' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentOrders.map((order, i) => (
-                <tr key={i}>
-                  <td style={{ fontWeight: '500', fontFamily: 'monospace' }}>{order.id}</td>
-                  <td>{order.style}</td>
-                  <td>{order.qty.toLocaleString()}</td>
-                  <td>
-                    <span style={{
-                      padding: '4px 8px',
-                      border: '1px solid',
-                      borderColor: order.status === 'Finished Goods' ? '#D4AF37' : 'var(--border-color)',
-                      color: order.status === 'Finished Goods' ? '#D4AF37' : 'var(--text-secondary)',
-                      fontSize: '11px',
-                      textTransform: 'uppercase',
-                      letterSpacing: '1px'
-                    }}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#D4AF37' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>visibility</span>
-                    </button>
-                  </td>
+          {recentOrders.length === 0 ? (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>No recent orders.</div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Buyer</th>
+                  <th>Quantity</th>
+                  <th>Delivery Date</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentOrders.map((order, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: '500', fontFamily: 'monospace' }}>{order.orderId}</td>
+                    <td>{order.buyer}</td>
+                    <td>{Number(order.qty).toLocaleString()}</td>
+                    <td>{order.deliveryDate}</td>
+                    <td>
+                      <span style={{
+                        padding: '4px 8px',
+                        border: '1px solid',
+                        borderColor: order.status === 'Finished Goods' ? '#D4AF37' : 'var(--border-color)',
+                        color: order.status === 'Finished Goods' ? '#D4AF37' : 'var(--text-secondary)',
+                        fontSize: '11px',
+                        textTransform: 'uppercase',
+                        letterSpacing: '1px'
+                      }}>
+                        {order.status || "Pending"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

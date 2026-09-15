@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import { initializeStore } from "@/utils/dataStore";
 
 export default function AppLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,6 +15,7 @@ export default function AppLayout({ children }) {
 
   useEffect(() => {
     setMounted(true);
+    initializeStore();
     const auth = localStorage.getItem("auth");
     if (auth === "true") {
       setIsAuthenticated(true);
