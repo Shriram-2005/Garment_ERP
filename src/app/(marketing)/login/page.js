@@ -3,24 +3,40 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { supabase } from "@/utils/supabaseClient";
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
   
   useEffect(() => {
-    if (localStorage.getItem("auth") === "true") {
-      router.push("/dashboard");
-    }
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session) {
+        router.push("/dashboard");
+      }
+    };
+    checkSession();
   }, [router]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email === "demo@demo.com" && password === "demo123") {
-      localStorage.setItem("auth", "true");
-      router.push("/dashboard");
+    setLoading(true);
+    setError("");
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
     } else {
-      alert("Invalid credentials. Please use demo@demo.com / demo123");
+      router.push("/dashboard");
     }
   };
 
@@ -98,7 +114,13 @@ export default function Login() {
             <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>Enter your credentials to access the shop floor dashboard.</p>
           </div>
           
-          <form onSubmit={handleSubmit}>
+          {error && (
+            <div style={{ padding: '16px', backgroundColor: 'rgba(230, 57, 70, 0.1)', border: '1px solid var(--error)', color: 'var(--error)', marginBottom: '24px', fontSize: '13px' }}>
+              {error}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit} autoComplete="off">
             <div style={{ marginBottom: '32px' }}>
               <label style={{ display: 'block', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                 Email Address
@@ -107,9 +129,10 @@ export default function Login() {
                 type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="demo@demo.com"
                 required
                 className="input-lux"
+                autoComplete="off"
+                style={{ borderBottom: '1px solid #D4AF37' }}
               />
             </div>
             
@@ -118,47 +141,44 @@ export default function Login() {
                 Password
               </label>
               <input 
-                type="password" 
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
                 required
                 className="input-lux"
+                autoComplete="new-password"
+                style={{ paddingRight: '40px', borderBottom: '1px solid #D4AF37' }}
               />
             </div>
             
-            <button type="submit" style={{ 
+            <button type="submit" disabled={loading} style={{ 
               width: '100%', 
               padding: '20px', 
               fontSize: '13px', 
               textTransform: 'uppercase', 
               letterSpacing: '3px',
-              backgroundColor: '#0A0A0A', 
+              backgroundColor: loading ? '#333' : '#0A0A0A', 
               color: '#F8F8F8', 
               border: '1px solid #0A0A0A', 
-              cursor: 'pointer', 
+              cursor: loading ? 'not-allowed' : 'pointer', 
               transition: 'all 0.4s ease',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
               gap: '12px'
             }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.borderColor = '#D4AF37'; e.currentTarget.style.color = '#0A0A0A'; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#0A0A0A'; e.currentTarget.style.borderColor = '#0A0A0A'; e.currentTarget.style.color = '#F8F8F8'; }}
+            onMouseOver={(e) => { if(!loading){ e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.borderColor = '#D4AF37'; e.currentTarget.style.color = '#0A0A0A'; } }}
+            onMouseOut={(e) => { if(!loading){ e.currentTarget.style.backgroundColor = '#0A0A0A'; e.currentTarget.style.borderColor = '#0A0A0A'; e.currentTarget.style.color = '#F8F8F8'; } }}
             >
-              Authenticate
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span>
+              {loading ? 'Authenticating...' : 'Authenticate'}
+              {!loading && <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span>}
             </button>
           </form>
 
-          <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid #D4AF37', fontSize: '13px', color: 'var(--text-secondary)' }}>
-            <p style={{ marginBottom: '8px', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px' }}>Demo Access</p>
-            <p style={{ fontFamily: 'monospace', fontSize: '14px', color: 'var(--text-primary)' }}>demo@demo.com / demo123</p>
-            <div style={{ marginTop: '24px' }}>
-              <Link href="/" style={{ color: '#D4AF37', textDecoration: 'none', borderBottom: '1px solid #D4AF37', paddingBottom: '4px', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px' }}>
-                Return to Entry
-              </Link>
-            </div>
+          <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid #D4AF37' }}>
+            <Link href="/" style={{ color: '#D4AF37', textDecoration: 'none', borderBottom: '1px solid #D4AF37', paddingBottom: '4px', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px' }}>
+              Return to Entry
+            </Link>
           </div>
           
         </div>

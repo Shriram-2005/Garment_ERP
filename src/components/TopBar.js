@@ -1,6 +1,12 @@
 "use client";
 
+import { supabase } from "@/utils/supabaseClient";
+
 export default function TopBar({ toggleTheme, theme, logout, toggleSidebar }) {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    if (logout) logout();
+  };
   return (
     <header style={{
       height: '70px',
@@ -80,7 +86,7 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar }) {
         </div>
 
         <button 
-          onClick={logout}
+          onClick={handleLogout}
           style={{ 
             padding: '10px 16px', 
             fontSize: '11px', 
