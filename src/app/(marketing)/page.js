@@ -1,299 +1,386 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const { scrollY } = useScroll();
+  
+  // Parallax calculations
+  const heroY = useTransform(scrollY, [0, 1000], [0, 300]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   if (!mounted) return null;
 
+  // Animation variants
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: "spring", stiffness: 40, damping: 20 }
+    }
+  };
+
+  const revealRight = {
+    hidden: { opacity: 0, x: -40 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  };
+
   return (
-    <div style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)' }}>
-      {/* 1. Hero Section */}
+    <div style={{ fontFamily: 'var(--font-sans)', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)', overflowX: 'hidden' }}>
+      
+
+
+      {/* 1. Cinematic Hero Section */}
       <section style={{
-        minHeight: '85vh',
+        height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         padding: '0 10%',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ maxWidth: '900px' }}>
-          <p style={{ 
+        {/* Animated Background Mesh */}
+        <div style={{
+          position: 'absolute',
+          top: '-50%', left: '-50%', right: '-50%', bottom: '-50%',
+          background: 'radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 60%)',
+          animation: 'pulse 15s ease-in-out infinite alternate',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }} />
+        
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(2%, 2%); }
+            100% { transform: scale(1) translate(-2%, -2%); }
+          }
+        `}} />
+
+        <motion.div 
+          style={{ maxWidth: '1000px', zIndex: 10, y: heroY, opacity: heroOpacity }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.p variants={fadeInUp} style={{ 
             textTransform: 'uppercase', 
-            letterSpacing: '4px', 
-            fontSize: '12px', 
+            letterSpacing: '6px', 
+            fontSize: '11px', 
             fontWeight: '600',
             color: '#D4AF37',
-            marginBottom: '32px'
+            marginBottom: '40px'
           }}>
             Bespoke Software for the Garment Industry
-          </p>
-          <h1 style={{ 
-            fontFamily: "'Playfair Display', serif", 
-            fontSize: '5.5rem', 
-            lineHeight: '1.1', 
+          </motion.p>
+          <motion.h1 variants={fadeInUp} style={{ 
+            fontFamily: "var(--font-playfair)", 
+            fontSize: 'clamp(4rem, 8vw, 7rem)', 
+            lineHeight: '1.05', 
             fontWeight: '400', 
-            marginBottom: '48px',
-            letterSpacing: '-1px'
+            marginBottom: '56px',
+            letterSpacing: '-2px'
           }}>
             Precision.<br/>
-            <span style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>Woven in code.</span>
-          </h1>
-          <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
+            <span style={{ fontStyle: 'italic', color: '#888888' }}>Woven in code.</span>
+          </motion.h1>
+          
+          <motion.div variants={fadeInUp} style={{ display: 'flex', gap: '48px', alignItems: 'center' }}>
             <Link href="/login" style={{ 
-              padding: '20px 48px', 
-              fontSize: '13px', 
+              position: 'relative',
+              padding: '24px 56px', 
+              fontSize: '12px', 
               textTransform: 'uppercase', 
-              letterSpacing: '3px', 
-              backgroundColor: '#0A0A0A', 
-              color: '#F8F8F8', 
-              border: '1px solid #0A0A0A',
-              transition: 'all 0.4s ease',
-              textDecoration: 'none'
-            }}
-            onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.borderColor = '#D4AF37'; e.currentTarget.style.color = '#0A0A0A'; }}
-            onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#0A0A0A'; e.currentTarget.style.borderColor = '#0A0A0A'; e.currentTarget.style.color = '#F8F8F8'; }}
-            >
-              Enter Prototype
-            </Link>
-            <a href="#philosophy" style={{ 
-              fontSize: '13px', 
-              textTransform: 'uppercase', 
-              letterSpacing: '3px', 
-              color: 'var(--text-primary)',
+              letterSpacing: '4px', 
+              backgroundColor: 'var(--accent)', 
+              color: 'var(--bg-primary)', 
+              fontWeight: '600',
               textDecoration: 'none',
-              borderBottom: '1px solid #D4AF37',
-              paddingBottom: '8px',
-              transition: 'opacity 0.3s ease'
+              overflow: 'hidden',
+              display: 'inline-block'
             }}
-            onMouseOver={(e) => e.currentTarget.style.opacity = '0.6'}
-            onMouseOut={(e) => e.currentTarget.style.opacity = '1'}
+            className="hero-btn"
+            >
+              <span style={{ position: 'relative', zIndex: 2 }}>Enter Prototype</span>
+              <div style={{
+                position: 'absolute',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent)',
+                transform: 'translateX(-100%)',
+                transition: 'transform 0.6s ease',
+                zIndex: 1
+              }} className="btn-glow" />
+            </Link>
+            
+            <style dangerouslySetInnerHTML={{__html: `
+              .hero-btn:hover .btn-glow {
+                transform: translateX(100%);
+              }
+            `}} />
+
+            <a href="#philosophy" style={{ 
+              fontSize: '12px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '3px', 
+              color: '#A0A0A0',
+              textDecoration: 'none',
+              borderBottom: '1px solid rgba(212, 175, 55, 0.3)',
+              paddingBottom: '8px',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderBottomColor = 'var(--accent)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderBottomColor = 'rgba(212, 175, 55, 0.3)'; }}
             >
               Discover Architecture
             </a>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* 2. Philosophy Section */}
       <section id="philosophy" style={{ 
-        padding: '140px 10%', 
-        borderTop: '1px solid #D4AF37',
+        padding: '160px 10%', 
+        borderTop: '1px solid var(--border-color)',
         display: 'flex',
-        gap: '12%'
+        gap: '10%',
+        flexWrap: 'wrap'
       }}>
-        <div style={{ flex: '1' }}>
+        <motion.div 
+          style={{ flex: '1', minWidth: '400px' }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }}
+          variants={revealRight}
+        >
           <h2 style={{ 
-            fontFamily: "'Playfair Display', serif", 
-            fontSize: '3rem', 
+            fontFamily: "var(--font-playfair)", 
+            fontSize: 'clamp(2.5rem, 4vw, 4rem)', 
             fontWeight: '400',
             lineHeight: '1.2'
           }}>
             The architecture of modern manufacturing.
           </h2>
-        </div>
-        <div style={{ flex: '1' }}>
-          <p style={{ 
-            fontSize: '1.2rem', 
+        </motion.div>
+        
+        <motion.div 
+          style={{ flex: '1', minWidth: '400px', paddingTop: '16px' }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.p variants={fadeInUp} style={{ 
+            fontSize: '1.25rem', 
             lineHeight: '1.8', 
-            color: 'var(--text-secondary)',
-            marginBottom: '60px'
+            color: '#888888',
+            marginBottom: '80px',
+            fontWeight: '300'
           }}>
-            Garment ERP was designed with the same meticulous attention to detail as high-end tailoring. 
+            Garment ERP was designed with the meticulous attention to detail of high-end tailoring. 
             We replaced the clutter of traditional factory software with an elegant, streamlined interface 
-            that provides absolute clarity from raw material sourcing to final dispatch.
-          </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            providing absolute clarity from raw material sourcing to final dispatch.
+          </motion.p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
             {[
               { label: "01", text: "Integrated Product & Style Master" },
               { label: "02", text: "Real-time Fabric & Trim Inventory" },
               { label: "03", text: "Dynamic Bill of Materials (BOM)" },
               { label: "04", text: "Precision Cutting & Bundle Management" }
             ].map((item, i) => (
-              <div key={i} style={{ 
+              <motion.div key={i} variants={fadeInUp} style={{ 
                 display: 'flex', 
-                gap: '32px', 
-                borderBottom: '1px solid #D4AF37', 
+                gap: '40px', 
+                borderBottom: '1px solid rgba(255,255,255,0.05)', 
                 paddingBottom: '24px' 
               }}>
-                <span style={{ fontSize: '12px', color: '#D4AF37', letterSpacing: '1px' }}>{item.label}</span>
-                <span style={{ fontSize: '14px', letterSpacing: '2px', textTransform: 'uppercase' }}>{item.text}</span>
-              </div>
+                <span style={{ fontSize: '13px', color: 'var(--accent)', letterSpacing: '2px' }}>{item.label}</span>
+                <span style={{ fontSize: '15px', letterSpacing: '3px', textTransform: 'uppercase', color: 'var(--text-primary)' }}>{item.text}</span>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
-      {/* 3. The Workflow Section - Dark Mode */}
+      {/* 3. The Workflow Section */}
       <section style={{ 
-        padding: '140px 10%', 
-        backgroundColor: '#0A0A0A',
-        color: '#F8F8F8',
-        borderTop: '1px solid #D4AF37'
+        padding: '160px 10%', 
+        backgroundColor: 'var(--bg-secondary)',
+        borderTop: '1px solid var(--border-color)'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '100px' }}>
-          <p style={{ color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '4px', fontSize: '12px', marginBottom: '24px' }}>
+        <motion.div 
+          style={{ textAlign: 'center', marginBottom: '120px' }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.p variants={fadeInUp} style={{ color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '5px', fontSize: '11px', marginBottom: '24px' }}>
             End-To-End Visibility
-          </p>
-          <h2 style={{ 
-            fontFamily: "'Playfair Display', serif", 
-            fontSize: '3.5rem', 
+          </motion.p>
+          <motion.h2 variants={fadeInUp} style={{ 
+            fontFamily: "var(--font-playfair)", 
+            fontSize: 'clamp(3rem, 5vw, 4.5rem)', 
             fontWeight: '400',
             marginBottom: '32px'
           }}>
             From Thread to Rack
-          </h2>
-          <p style={{ color: '#A0A0A0', maxWidth: '650px', margin: '0 auto', lineHeight: '1.8', fontSize: '1.1rem' }}>
-            Trace every garment's lifecycle. A continuous, uncompromised workflow engineered for high-volume apparel production.
-          </p>
-        </div>
+          </motion.h2>
+          <motion.p variants={fadeInUp} style={{ color: '#888888', maxWidth: '700px', margin: '0 auto', lineHeight: '1.9', fontSize: '1.1rem', fontWeight: '300' }}>
+            Trace every garment&apos;s lifecycle. A continuous, uncompromised workflow engineered for high-volume apparel production.
+          </motion.p>
+        </motion.div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '40px' }}>
+        <motion.div 
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '40px' }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }}
+          variants={staggerContainer}
+        >
           {[
             { step: "Sourcing", desc: "Roll-wise fabric tracking and accessory inventory." },
             { step: "Cutting", desc: "Marker planning and bundle QR code generation." },
             { step: "Sewing", desc: "Line allocation and real-time WIP monitoring." },
             { step: "Finishing", desc: "Ironing, tagging, and stringent quality control." }
           ].map((item, i) => (
-            <div key={i} style={{ flex: '1', minWidth: '220px', textAlign: 'center' }}>
+            <motion.div key={i} variants={fadeInUp} style={{ textAlign: 'center', padding: '0 20px' }}>
               <div style={{ 
-                width: '80px', height: '80px', borderRadius: '50%', border: '1px solid #D4AF37', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 32px',
-                color: '#D4AF37', fontFamily: "'Playfair Display', serif", fontSize: '28px'
+                width: '100px', height: '100px', borderRadius: '50%', border: '1px solid rgba(212, 175, 55, 0.3)', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 40px',
+                color: '#D4AF37', fontFamily: "var(--font-playfair)", fontSize: '32px',
+                background: 'rgba(212, 175, 55, 0.02)'
               }}>
                 {i + 1}
               </div>
-              <h4 style={{ textTransform: 'uppercase', letterSpacing: '3px', fontSize: '13px', marginBottom: '20px' }}>{item.step}</h4>
-              <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: '1.8' }}>{item.desc}</p>
-            </div>
+              <h4 style={{ textTransform: 'uppercase', letterSpacing: '4px', fontSize: '12px', marginBottom: '24px', color: 'var(--text-primary)' }}>{item.step}</h4>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.9', fontWeight: '300' }}>{item.desc}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* 4. Modules Grid Section */}
-      <section style={{ padding: '140px 10% 0' }}>
-        <div style={{ marginBottom: '100px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '3.5rem', fontWeight: '400', lineHeight: '1.1' }}>
+      <section style={{ padding: '160px 10% 0' }}>
+        <motion.div 
+          style={{ marginBottom: '120px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '40px' }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.h2 variants={fadeInUp} style={{ fontFamily: "var(--font-playfair)", fontSize: 'clamp(3rem, 5vw, 4.5rem)', fontWeight: '400', lineHeight: '1.1', margin: 0 }}>
             The Suite
-          </h2>
-          <p style={{ maxWidth: '400px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+          </motion.h2>
+          <motion.p variants={fadeInUp} style={{ maxWidth: '450px', color: '#888888', lineHeight: '1.8', margin: 0, fontWeight: '300', fontSize: '1.1rem' }}>
             Over 20 deeply integrated modules working in perfect unison to orchestrate your shop floor.
-          </p>
-        </div>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
-          borderTop: '1px solid #D4AF37',
-          borderLeft: '1px solid #D4AF37'
-        }}>
+          </motion.p>
+        </motion.div>
+        
+        <motion.div 
+          style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
+            borderTop: '1px solid var(--border-color)',
+            borderLeft: '1px solid var(--border-color)'
+          }}
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }}
+          variants={staggerContainer}
+        >
           {[
             { title: "Material Requirement", desc: "Automated shortage identification and precise procurement.", icon: "precision_manufacturing" },
-            { title: "Production Planning", desc: "Line, machine, and manpower allocation tailored to style capacity.", icon: "calendar_month" },
+            { title: "Production Planning", desc: "Line, machine, and manpower allocation tailored to capacity.", icon: "calendar_month" },
             { title: "Quality Assurance", desc: "Rigorous inline and final defect tracking to maintain brand standards.", icon: "fact_check" },
             { title: "Dispatch Logistics", desc: "Seamless carton packing, invoicing, and shipment tracking.", icon: "local_shipping" },
-            { title: "Master Data Management", desc: "Centralized style, color, and size catalogs with complete revision history.", icon: "style" },
-            { title: "Real-time Costing", desc: "Dynamic BOM calculation and exact margin tracking per order.", icon: "request_quote" }
+            { title: "Master Data Mgmt", desc: "Centralized catalogs with complete revision history.", icon: "style" },
+            { title: "Real-time Costing", desc: "Dynamic BOM calculation and exact margin tracking.", icon: "request_quote" }
           ].map((mod, i) => (
-            <div key={i} style={{ 
+            <motion.div key={i} variants={fadeInUp} style={{ 
               padding: '80px 60px', 
-              borderRight: '1px solid #D4AF37', 
-              borderBottom: '1px solid #D4AF37',
+              borderRight: '1px solid var(--border-color)', 
+              borderBottom: '1px solid var(--border-color)',
               transition: 'background-color 0.4s ease'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <span className="material-symbols-outlined" style={{ 
-                fontSize: '28px', 
+                fontSize: '32px', 
                 color: '#D4AF37',
-                marginBottom: '40px',
+                marginBottom: '48px',
                 display: 'block'
               }}>{mod.icon}</span>
               <h3 style={{ 
-                fontFamily: "'Playfair Display', serif", 
+                fontFamily: "var(--font-playfair)", 
                 fontSize: '2rem', 
                 fontWeight: '400',
-                marginBottom: '20px'
+                marginBottom: '24px'
               }}>{mod.title}</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1rem' }}>
+              <p style={{ color: '#888888', lineHeight: '1.8', fontSize: '1rem', fontWeight: '300' }}>
                 {mod.desc}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
-      {/* 5. Analytics & Insights Section */}
-      <section style={{ padding: '140px 10%', display: 'flex', gap: '12%', alignItems: 'center' }}>
-        <div style={{ flex: '1' }}>
-          <div style={{ 
-            padding: '60px', border: '1px solid #D4AF37', position: 'relative' 
-          }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', height: '240px', borderBottom: '1px solid var(--border-color)' }}>
-              {[40, 70, 55, 90, 65, 100].map((h, i) => (
-                <div key={i} style={{ flex: '1', height: `${h}%`, backgroundColor: i === 5 ? '#D4AF37' : 'var(--bg-tertiary)', transition: 'height 1s ease' }}></div>
-              ))}
-            </div>
-            <div style={{ marginTop: '32px', display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: '13px', textTransform: 'uppercase', letterSpacing: '2px', color: 'var(--text-secondary)' }}>Overall Efficiency</span>
-              <span style={{ fontSize: '14px', color: '#D4AF37', fontWeight: 'bold' }}>+24%</span>
-            </div>
-          </div>
-        </div>
-        <div style={{ flex: '1' }}>
-          <p style={{ color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '3px', fontSize: '12px', marginBottom: '24px' }}>
-            Data-Driven Profitability
-          </p>
-          <h2 style={{ 
-            fontFamily: "'Playfair Display', serif", 
-            fontSize: '3rem', 
-            fontWeight: '400',
-            lineHeight: '1.2',
-            marginBottom: '40px'
-          }}>
-            Know your exact margins.<br/> Before the fabric is cut.
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.1rem' }}>
-            The Costing and Dashboard modules aggregate labor, processing, overhead, and wastage into a single pane of glass. Make informed decisions that protect your bottom line, all in real-time.
-          </p>
-        </div>
-      </section>
-
-      {/* 6. Final CTA - Dark Mode */}
+      {/* 5. Final CTA */}
       <section style={{ 
-        padding: '160px 10%', 
+        padding: '200px 10%', 
         textAlign: 'center', 
-        backgroundColor: '#0A0A0A', 
-        color: '#F8F8F8',
-        borderTop: '1px solid #D4AF37'
+        backgroundColor: 'var(--bg-primary)', 
+        borderTop: '1px solid var(--border-color)'
       }}>
-        <h2 style={{ 
-          fontFamily: "'Playfair Display', serif", 
-          fontSize: '4rem', 
-          fontWeight: '400',
-          marginBottom: '48px'
-        }}>
-          Experience the standard.
-        </h2>
-        <Link href="/login" style={{ 
-          display: 'inline-block',
-          padding: '20px 48px', 
-          fontSize: '13px', 
-          textTransform: 'uppercase', 
-          letterSpacing: '3px', 
-          backgroundColor: 'transparent', 
-          color: '#D4AF37', 
-          border: '1px solid #D4AF37',
-          transition: 'all 0.4s ease',
-          textDecoration: 'none'
-        }}
-        onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.color = '#0A0A0A'; }}
-        onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#D4AF37'; }}
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
         >
-          Access the System
-        </Link>
+          <motion.h2 variants={fadeInUp} style={{ 
+            fontFamily: "var(--font-playfair)", 
+            fontSize: 'clamp(3rem, 6vw, 5rem)', 
+            fontWeight: '400',
+            marginBottom: '64px'
+          }}>
+            Experience the standard.
+          </motion.h2>
+          <motion.div variants={fadeInUp}>
+            <Link href="/login" style={{ 
+              display: 'inline-block',
+              padding: '24px 64px', 
+              fontSize: '12px', 
+              textTransform: 'uppercase', 
+              letterSpacing: '4px', 
+              backgroundColor: 'transparent', 
+              color: '#D4AF37', 
+              border: '1px solid rgba(212, 175, 55, 0.5)',
+              transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+              textDecoration: 'none'
+            }}
+            onMouseOver={(e) => { 
+              e.currentTarget.style.backgroundColor = 'var(--accent)'; 
+              e.currentTarget.style.color = 'var(--bg-primary)'; 
+              e.currentTarget.style.boxShadow = '0 0 40px rgba(212, 175, 55, 0.2)';
+            }}
+            onMouseOut={(e) => { 
+              e.currentTarget.style.backgroundColor = 'transparent'; 
+              e.currentTarget.style.color = '#D4AF37'; 
+              e.currentTarget.style.boxShadow = 'none';
+            }}
+            >
+              Access the System
+            </Link>
+          </motion.div>
+        </motion.div>
       </section>
     </div>
   );

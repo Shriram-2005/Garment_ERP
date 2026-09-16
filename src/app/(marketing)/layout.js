@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function MarketingLayout({ children }) {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("dark");
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
@@ -22,7 +22,7 @@ export default function MarketingLayout({ children }) {
       setTheme(storedTheme);
       document.documentElement.setAttribute("data-theme", storedTheme);
     } else {
-      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.setAttribute("data-theme", "dark");
     }
 
     return () => { document.head.removeChild(link); }
@@ -62,7 +62,7 @@ export default function MarketingLayout({ children }) {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
             <nav style={{ display: 'flex', gap: '40px' }}>
-              <Link href="#architecture" style={{ color: '#D4AF37', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px', textDecoration: 'none' }}>Architecture</Link>
+              <Link href="#philosophy" style={{ color: '#D4AF37', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px', textDecoration: 'none' }}>Architecture</Link>
             </nav>
             
             <div style={{ height: '40px', width: '1px', backgroundColor: '#D4AF37' }}></div>

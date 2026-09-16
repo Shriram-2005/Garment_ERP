@@ -19,7 +19,9 @@ export default function Modal({ isOpen, onClose, title, children }) {
       left: 0,
       width: '100vw',
       height: '100vh',
-      backgroundColor: 'rgba(10, 10, 10, 0.95)',
+      backgroundColor: 'rgba(5, 5, 5, 0.7)',
+      backdropFilter: 'blur(8px)',
+      WebkitBackdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -28,9 +30,10 @@ export default function Modal({ isOpen, onClose, title, children }) {
     }}>
       <div style={{
         backgroundColor: 'var(--bg-secondary)',
-        border: '1px solid #D4AF37',
+        border: '1px solid var(--border-color)',
+        boxShadow: 'var(--card-shadow)',
         width: '100%',
-        maxWidth: '600px',
+        maxWidth: '640px',
         maxHeight: '90vh',
         overflowY: 'auto',
         position: 'relative',
@@ -38,30 +41,32 @@ export default function Modal({ isOpen, onClose, title, children }) {
         flexDirection: 'column'
       }}>
         <div style={{
-          padding: '24px 32px',
-          borderBottom: '1px solid #D4AF37',
+          padding: '32px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          backgroundColor: '#0A0A0A',
-          color: '#F8F8F8'
+          backgroundColor: 'transparent',
+          color: 'var(--text-primary)'
         }}>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: '400', margin: 0 }}>{title}</h2>
+          <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: '1.8rem', fontWeight: '400', margin: 0 }}>{title}</h2>
           <button 
             type="button"
             onClick={onClose}
             style={{
               background: 'transparent',
               border: 'none',
-              color: '#D4AF37',
+              color: 'var(--text-secondary)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '4px'
+              padding: '4px',
+              transition: 'color 0.3s ease'
             }}
+            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>close</span>
+            <span className="material-symbols-outlined" style={{ fontSize: '24px' }}>close</span>
           </button>
         </div>
         

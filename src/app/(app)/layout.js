@@ -46,6 +46,7 @@ export default function AppLayout({ children }) {
       setTheme(storedTheme);
       document.documentElement.setAttribute("data-theme", storedTheme);
     } else {
+      document.documentElement.setAttribute("data-theme", "dark");
     }
   }, [router, pathname]);
 

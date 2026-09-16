@@ -33,9 +33,9 @@ export default function Dashboard() {
         </div>
         <button style={{ 
           padding: '12px 24px', 
-          backgroundColor: '#0A0A0A', 
-          color: '#F8F8F8', 
-          border: '1px solid #0A0A0A', 
+          backgroundColor: 'var(--text-primary)', 
+          color: 'var(--bg-primary)', 
+          border: '1px solid var(--text-primary)', 
           textTransform: 'uppercase', 
           letterSpacing: '2px', 
           fontSize: '11px',
@@ -45,8 +45,8 @@ export default function Dashboard() {
           gap: '8px',
           transition: 'all 0.3s ease'
         }}
-        onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.borderColor = '#D4AF37'; e.currentTarget.style.color = '#0A0A0A'; }}
-        onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#0A0A0A'; e.currentTarget.style.borderColor = '#0A0A0A'; e.currentTarget.style.color = '#F8F8F8'; }}
+        onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+        onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'var(--text-primary)'; e.currentTarget.style.color = 'var(--bg-primary)'; }}
         >
           <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>download</span>
           Export Report

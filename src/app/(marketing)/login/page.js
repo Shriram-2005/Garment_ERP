@@ -6,8 +6,8 @@ import Link from "next/link";
 import { supabase } from "@/utils/supabaseClient";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("garmenterp@gmail.com");
+  const [password, setPassword] = useState("GarmentERP@1");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -50,8 +50,8 @@ export default function Login() {
       {/* Left side - Dark Distinct Aesthetic (Matching Header) */}
       <div style={{ 
         flex: 1, 
-        backgroundColor: '#0A0A0A',
-        color: '#F8F8F8',
+        backgroundColor: 'var(--bg-secondary)',
+        color: 'var(--text-primary)',
         borderRight: '1px solid #D4AF37'
       }} className="desktop-only">
         <div style={{
@@ -62,8 +62,8 @@ export default function Login() {
           padding: '80px'
         }}>
           <div>
-            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '16px', textDecoration: 'none', color: '#F8F8F8' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: '#D4AF37' }}>straighten</span>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '16px', textDecoration: 'none', color: 'var(--text-primary)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--accent)' }}>straighten</span>
               <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '24px', letterSpacing: '1px' }}>Garment ERP</span>
             </Link>
           </div>
@@ -75,13 +75,13 @@ export default function Login() {
               lineHeight: '1.1',
               marginBottom: '32px'
             }}>
-              Uncompromising <br/> <span style={{ color: '#D4AF37', fontStyle: 'italic' }}>Precision.</span>
+              Uncompromising <br/> <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>Precision.</span>
             </h1>
             <p style={{ 
               fontSize: '12px', 
               textTransform: 'uppercase', 
               letterSpacing: '4px', 
-              color: '#A0A0A0' 
+              color: 'var(--text-secondary)' 
             }}>
               Authorized Factory Personnel Only
             </p>
@@ -96,7 +96,7 @@ export default function Login() {
           width: 100%; padding: 16px 0; border: none; border-bottom: 1px solid var(--border-color); 
           background: transparent; color: var(--text-primary); font-size: 16px; outline: none; transition: border-color 0.4s ease;
         }
-        .input-lux:focus { border-bottom: 1px solid #D4AF37; }
+        .input-lux:focus { border-bottom: 1px solid var(--accent); }
       `}} />
 
       {/* Right side - Form */}
@@ -111,7 +111,12 @@ export default function Login() {
           
           <div style={{ marginBottom: '40px' }}>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '2.5rem', fontWeight: '400', marginBottom: '8px' }}>Sign In</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>Enter your credentials to access the shop floor dashboard.</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: '1.6' }}>
+              Enter your credentials to access the shop floor dashboard.<br/>
+              <span style={{ fontSize: '12px', color: 'var(--accent)', marginTop: '8px', display: 'inline-block', letterSpacing: '1px' }}>
+                Demo Credentials: garmenterp@gmail.com / GarmentERP@1
+              </span>
+            </p>
           </div>
           
           {error && (
@@ -132,7 +137,7 @@ export default function Login() {
                 required
                 className="input-lux"
                 autoComplete="off"
-                style={{ borderBottom: '1px solid #D4AF37' }}
+                style={{ borderBottom: '1px solid var(--accent)' }}
               />
             </div>
             
@@ -147,7 +152,7 @@ export default function Login() {
                 required
                 className="input-lux"
                 autoComplete="new-password"
-                style={{ paddingRight: '40px', borderBottom: '1px solid #D4AF37' }}
+                style={{ paddingRight: '40px', borderBottom: '1px solid var(--accent)' }}
               />
             </div>
             
@@ -157,9 +162,9 @@ export default function Login() {
               fontSize: '13px', 
               textTransform: 'uppercase', 
               letterSpacing: '3px',
-              backgroundColor: loading ? '#333' : '#0A0A0A', 
-              color: '#F8F8F8', 
-              border: '1px solid #0A0A0A', 
+              backgroundColor: loading ? 'var(--border-color)' : 'var(--text-primary)', 
+              color: 'var(--bg-primary)', 
+              border: '1px solid var(--text-primary)', 
               cursor: loading ? 'not-allowed' : 'pointer', 
               transition: 'all 0.4s ease',
               display: 'flex',
@@ -167,16 +172,16 @@ export default function Login() {
               alignItems: 'center',
               gap: '12px'
             }}
-            onMouseOver={(e) => { if(!loading){ e.currentTarget.style.backgroundColor = '#D4AF37'; e.currentTarget.style.borderColor = '#D4AF37'; e.currentTarget.style.color = '#0A0A0A'; } }}
-            onMouseOut={(e) => { if(!loading){ e.currentTarget.style.backgroundColor = '#0A0A0A'; e.currentTarget.style.borderColor = '#0A0A0A'; e.currentTarget.style.color = '#F8F8F8'; } }}
+            onMouseOver={(e) => { if(!loading){ e.currentTarget.style.backgroundColor = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--bg-primary)'; } }}
+            onMouseOut={(e) => { if(!loading){ e.currentTarget.style.backgroundColor = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'var(--text-primary)'; e.currentTarget.style.color = 'var(--bg-primary)'; } }}
             >
               {loading ? 'Authenticating...' : 'Authenticate'}
               {!loading && <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span>}
             </button>
           </form>
 
-          <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid #D4AF37' }}>
-            <Link href="/" style={{ color: '#D4AF37', textDecoration: 'none', borderBottom: '1px solid #D4AF37', paddingBottom: '4px', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px' }}>
+          <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid var(--accent)' }}>
+            <Link href="/" style={{ color: 'var(--accent)', textDecoration: 'none', borderBottom: '1px solid var(--accent)', paddingBottom: '4px', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px' }}>
               Return to Entry
             </Link>
           </div>
