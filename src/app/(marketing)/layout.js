@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
+import StaggeredMenu from "../../components/StaggeredMenu";
 export default function MarketingLayout({ children }) {
   const [theme, setTheme] = useState("dark");
   const [mounted, setMounted] = useState(false);
@@ -39,6 +39,19 @@ export default function MarketingLayout({ children }) {
 
   const isLoginPage = pathname === "/login";
 
+  const menuItems = [
+    { label: 'Platform', ariaLabel: 'Go to platform', link: '/#philosophy' },
+    { label: 'Solutions', ariaLabel: 'Go to solutions', link: '/solutions' },
+    { label: 'About Us', ariaLabel: 'Learn about us', link: '/about' },
+    { label: 'Contact', ariaLabel: 'Get in touch', link: '/contact' },
+    { label: 'Sign In', ariaLabel: 'Sign in to your account', link: '/login' }
+  ];
+
+  const socialItems = [
+    { label: 'LinkedIn', link: 'https://linkedin.com' },
+    { label: 'Twitter', link: 'https://twitter.com' }
+  ];
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
       {!isLoginPage && (
@@ -60,24 +73,20 @@ export default function MarketingLayout({ children }) {
             <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '22px', letterSpacing: '1px' }}>Garment ERP</span>
           </Link>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-            <nav style={{ display: 'flex', gap: '40px' }}>
-              <Link href="#philosophy" style={{ color: '#D4AF37', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '2px', textDecoration: 'none' }}>Architecture</Link>
-            </nav>
-            
-            <div style={{ height: '40px', width: '1px', backgroundColor: '#D4AF37' }}></div>
-            
+          <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
             <button 
               onClick={toggleTheme}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#F8F8F8',
+                color: '#D4AF37',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '8px'
+                padding: '8px',
+                position: 'relative',
+                zIndex: 51
               }}
               title="Toggle Theme"
             >
@@ -85,18 +94,21 @@ export default function MarketingLayout({ children }) {
                 {theme === "light" ? "dark_mode" : "light_mode"}
               </span>
             </button>
-            
-            <Link href="/login" style={{ 
-              color: '#F8F8F8', 
-              textTransform: 'uppercase', 
-              fontSize: '11px', 
-              letterSpacing: '2px', 
-              textDecoration: 'none',
-              borderBottom: '1px solid #D4AF37',
-              paddingBottom: '4px'
-            }}>
-              Sign In
-            </Link>
+
+            <div style={{ height: '30px', width: '1px', backgroundColor: '#D4AF37', opacity: 0.3 }}></div>
+
+            <StaggeredMenu
+              position="right"
+              items={menuItems}
+              socialItems={socialItems}
+              displaySocials={true}
+              displayItemNumbering={true}
+              menuButtonColor="#D4AF37"
+              openMenuButtonColor="#D4AF37"
+              changeMenuColorOnOpen={true}
+              colors={theme === 'light' ? ['#e0e0e0', '#f5f5f5'] : ['#111111', '#1A1A1A']}
+              accentColor="#D4AF37"
+            />
           </div>
         </header>
       )}
