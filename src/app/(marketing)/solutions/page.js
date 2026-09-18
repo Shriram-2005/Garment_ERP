@@ -5,10 +5,12 @@ export const metadata = {
 
 export default function SolutionsPage() {
   const modules = [
-    { title: "Inventory Management", description: "Real-time tracking of fabrics, accessories, and finished goods with automated reorder alerts.", icon: "inventory_2" },
-    { title: "Production Tracking", description: "Monitor cutting, stitching, and finishing processes on the factory floor with precise analytics.", icon: "factory" },
-    { title: "Quality Assurance", description: "Digitized inspection workflows to ensure every garment meets strict international standards.", icon: "verified" },
-    { title: "Order Fulfillment", description: "Seamless integration with shipping providers and real-time dispatch tracking for B2B orders.", icon: "local_shipping" }
+    { title: "Material Requirement", description: "Automated shortage identification and precise procurement.", icon: "precision_manufacturing" },
+    { title: "Production Planning", description: "Line, machine, and manpower allocation tailored to capacity.", icon: "calendar_month" },
+    { title: "Quality Assurance", description: "Rigorous inline and final defect tracking to maintain brand standards.", icon: "fact_check" },
+    { title: "Dispatch Logistics", description: "Seamless carton packing, invoicing, and shipment tracking.", icon: "local_shipping" },
+    { title: "Master Data Mgmt", description: "Centralized catalogs with complete revision history.", icon: "style" },
+    { title: "Real-time Costing", description: "Dynamic BOM calculation and exact margin tracking.", icon: "request_quote" }
   ];
 
   return (
