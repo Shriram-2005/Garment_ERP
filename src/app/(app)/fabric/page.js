@@ -16,7 +16,9 @@ export default function FabricModule() {
       { value: "Meters", label: "Meters" },
       { value: "Yards", label: "Yards" },
     ]},
-    { key: "cost", label: "Cost Per Unit ($)", type: "number" }
+    { key: "cost", label: "Cost Per Unit ($)", type: "number" },
+    { key: "threshold", label: "Alert Threshold", type: "number" },
+    { key: "status", label: "Status", type: "text" }
   ];
 
   return (
@@ -32,6 +34,7 @@ export default function FabricModule() {
         moduleName="fabric" 
         schema={schema} 
         title="Fabric Stock Ledger" 
+        customActions={(record) => record.status === 'In Stock' ? [{ label: 'Mark Low Stock', status: 'Low Stock', icon: 'warning', successMsg: 'Marked Low Stock' }, { label: 'Mark Out of Stock', status: 'Out of Stock', icon: 'block', successMsg: 'Marked Out of Stock' }] : record.status === 'Low Stock' ? [{ label: 'Restock', status: 'In Stock', icon: 'inventory', successMsg: 'Restocked' }, { label: 'Mark Out of Stock', status: 'Out of Stock', icon: 'block', successMsg: 'Marked Out of Stock' }] : [{ label: 'Restock', status: 'In Stock', icon: 'inventory', successMsg: 'Restocked' }]}
       />
     </div>
   );

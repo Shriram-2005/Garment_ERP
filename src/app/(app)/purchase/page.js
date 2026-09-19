@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function PurchaseModule() {
-  const schema = [{ key: 'poNumber', label: 'PO Number' }, { key: 'vendor', label: 'Vendor' }, { key: 'amount', label: 'Amount ($)', type: 'number' }];
+  const schema = [{ key: 'poNumber', label: 'PO Number' }, { key: 'vendor', label: 'Vendor' }, { key: 'amount', label: 'Amount ($)', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function PurchaseModule() {
         moduleName="purchase" 
         schema={schema} 
         title="Purchase Orders Records" 
+        customActions={(record) => record.status === 'Draft' ? [{ label: 'Send to Vendor', status: 'Sent', icon: 'send', successMsg: 'PO Sent' }] : record.status === 'Sent' ? [{ label: 'Mark Received', status: 'Received', icon: 'inventory', successMsg: 'Goods Received' }] : []}
       />
     </div>
   );

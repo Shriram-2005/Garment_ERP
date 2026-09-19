@@ -16,6 +16,7 @@ export default function MasterModule() {
       { value: "Winter 2026", label: "Winter 2026" },
       { value: "Spring 2026", label: "Spring 2026" },
     ]}
+      , { key: "status", label: "Status", type: "text" }
   ];
 
   return (
@@ -31,6 +32,7 @@ export default function MasterModule() {
         moduleName="master" 
         schema={schema} 
         title="Style Database" 
+        customActions={(record) => record.status === 'Draft' ? [{ label: 'Approve', status: 'Active', icon: 'check_circle', successMsg: 'Style Approved' }] : record.status === 'Active' ? [{ label: 'Archive', status: 'Archived', icon: 'archive', successMsg: 'Style Archived' }] : []}
       />
     </div>
   );

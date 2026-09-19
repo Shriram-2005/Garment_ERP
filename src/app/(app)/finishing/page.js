@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function FinishingModule() {
-  const schema = [{ key: 'batchId', label: 'Batch ID' }, { key: 'status', label: 'Status' }];
+  const schema = [{ key: 'batchId', label: 'Batch ID' }, { key: 'status', label: 'Status' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function FinishingModule() {
         moduleName="finishing" 
         schema={schema} 
         title="Finishing Records" 
+        customActions={(record) => record.status === 'Washing' ? [{ label: 'Move to Ironing', status: 'Ironing', icon: 'iron', successMsg: 'Moved to Ironing' }] : record.status === 'Ironing' ? [{ label: 'Move to Folded', status: 'Folded', icon: 'checkroom', successMsg: 'Folded' }] : []}
       />
     </div>
   );

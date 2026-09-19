@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function StitchingModule() {
-  const schema = [{ key: 'lineNo', label: 'Line Number' }, { key: 'outputQty', label: 'Output Qty', type: 'number' }];
+  const schema = [{ key: 'lineNo', label: 'Line Number' }, { key: 'outputQty', label: 'Output Qty', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function StitchingModule() {
         moduleName="stitching" 
         schema={schema} 
         title="Sewing / Stitching Records" 
+        customActions={(record) => record.status === 'In Progress' ? [{ label: 'Complete Output', status: 'Completed', icon: 'task_alt', successMsg: 'Stitching Completed' }] : []}
       />
     </div>
   );

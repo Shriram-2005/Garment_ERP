@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function CuttingModule() {
-  const schema = [{ key: 'jobId', label: 'Job ID' }, { key: 'cutQty', label: 'Cut Quantity', type: 'number' }];
+  const schema = [{ key: 'jobId', label: 'Job ID' }, { key: 'cutQty', label: 'Cut Quantity', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function CuttingModule() {
         moduleName="cutting" 
         schema={schema} 
         title="Cutting Records" 
+        customActions={(record) => record.status === 'Pending' ? [{ label: 'Start Cutting', status: 'In Progress', icon: 'content_cut', successMsg: 'Cutting Started' }] : record.status === 'In Progress' ? [{ label: 'Complete Job', status: 'Completed', icon: 'task_alt', successMsg: 'Cutting Completed' }] : []}
       />
     </div>
   );

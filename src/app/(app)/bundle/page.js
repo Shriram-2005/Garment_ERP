@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function BundleModule() {
-  const schema = [{ key: 'bundleId', label: 'Bundle ID' }, { key: 'size', label: 'Size' }, { key: 'pcs', label: 'Pieces', type: 'number' }];
+  const schema = [{ key: 'bundleId', label: 'Bundle ID' }, { key: 'size', label: 'Size' }, { key: 'pcs', label: 'Pieces', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function BundleModule() {
         moduleName="bundle" 
         schema={schema} 
         title="Bundle Management Records" 
+        customActions={(record) => record.status === 'Generated' ? [{ label: 'Dispatch to Sewing', status: 'Dispatched', icon: 'local_shipping', successMsg: 'Dispatched to Sewing' }] : []}
       />
     </div>
   );

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import { supabase } from "@/utils/supabaseClient";
+import { createClient } from "@/utils/supabase/client";
 
 export default function Login() {
   const [email, setEmail] = useState("garmenterp@gmail.com");
@@ -11,6 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const supabase = createClient();
   
   useEffect(() => {
     const checkSession = async () => {
@@ -20,7 +21,7 @@ export default function Login() {
       }
     };
     checkSession();
-  }, [router]);
+  }, [router, supabase.auth]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

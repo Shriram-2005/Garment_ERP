@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function QualityModule() {
-  const schema = [{ key: 'inspectionId', label: 'Inspection ID' }, { key: 'passQty', label: 'Passed Qty', type: 'number' }, { key: 'failQty', label: 'Failed Qty', type: 'number' }];
+  const schema = [{ key: 'inspectionId', label: 'Inspection ID' }, { key: 'passQty', label: 'Passed Qty', type: 'number' }, { key: 'failQty', label: 'Failed Qty', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function QualityModule() {
         moduleName="quality" 
         schema={schema} 
         title="Quality Control Records" 
+        customActions={(record) => record.status === 'Pending' ? [{ label: 'Pass Inspection', status: 'Passed', icon: 'verified', successMsg: 'Passed QA' }, { label: 'Fail Inspection', status: 'Failed', icon: 'cancel', successMsg: 'Failed QA' }] : record.status === 'Failed' ? [{ label: 'Rework Done', status: 'Passed', icon: 'verified', successMsg: 'Passed QA after rework' }] : []}
       />
     </div>
   );

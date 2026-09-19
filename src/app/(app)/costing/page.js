@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function CostingModule() {
-  const schema = [{ key: 'styleCode', label: 'Style Code' }, { key: 'totalCost', label: 'Total Cost ($)', type: 'number' }];
+  const schema = [{ key: 'styleCode', label: 'Style Code' }, { key: 'totalCost', label: 'Total Cost ($)', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function CostingModule() {
         moduleName="costing" 
         schema={schema} 
         title="Costing Records" 
+        customActions={(record) => record.status === 'Pending' ? [{ label: 'Approve', status: 'Approved', icon: 'check_circle', successMsg: 'Costing Approved' }] : []}
       />
     </div>
   );

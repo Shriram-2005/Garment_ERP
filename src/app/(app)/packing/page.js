@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function PackingModule() {
-  const schema = [{ key: 'cartonNo', label: 'Carton No' }, { key: 'contents', label: 'Contents' }];
+  const schema = [{ key: 'cartonNo', label: 'Carton No' }, { key: 'contents', label: 'Contents' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function PackingModule() {
         moduleName="packing" 
         schema={schema} 
         title="Packing Records" 
+        customActions={(record) => record.status === 'Pending' ? [{ label: 'Seal Carton', status: 'Sealed', icon: 'inventory_2', successMsg: 'Carton Sealed' }] : record.status === 'Sealed' ? [{ label: 'Mark Ready', status: 'Ready for Dispatch', icon: 'local_shipping', successMsg: 'Ready for Dispatch' }] : []}
       />
     </div>
   );

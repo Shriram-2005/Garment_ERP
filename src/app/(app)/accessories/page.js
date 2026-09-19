@@ -17,7 +17,9 @@ export default function AccessoriesModule() {
       { value: "Gross", label: "Gross" },
       { value: "Meters", label: "Meters" },
     ]},
-    { key: "cost", label: "Cost Per Unit ($)", type: "number" }
+    { key: "cost", label: "Cost Per Unit ($)", type: "number" },
+    { key: "threshold", label: "Alert Threshold", type: "number" },
+    { key: "status", label: "Status", type: "text" }
   ];
 
   return (
@@ -33,6 +35,7 @@ export default function AccessoriesModule() {
         moduleName="accessories" 
         schema={schema} 
         title="Trims & Accessories Stock" 
+        customActions={(record) => record.status === 'In Stock' ? [{ label: 'Mark Low Stock', status: 'Low Stock', icon: 'warning', successMsg: 'Marked Low Stock' }, { label: 'Mark Out of Stock', status: 'Out of Stock', icon: 'block', successMsg: 'Marked Out of Stock' }] : record.status === 'Low Stock' ? [{ label: 'Restock', status: 'In Stock', icon: 'inventory', successMsg: 'Restocked' }, { label: 'Mark Out of Stock', status: 'Out of Stock', icon: 'block', successMsg: 'Marked Out of Stock' }] : [{ label: 'Restock', status: 'In Stock', icon: 'inventory', successMsg: 'Restocked' }]}
       />
     </div>
   );

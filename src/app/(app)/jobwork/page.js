@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function JobworkModule() {
-  const schema = [{ key: 'challanNo', label: 'Challan No' }, { key: 'contractor', label: 'Contractor Name' }];
+  const schema = [{ key: 'challanNo', label: 'Challan No' }, { key: 'contractor', label: 'Contractor Name' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function JobworkModule() {
         moduleName="jobwork" 
         schema={schema} 
         title="Job Work Records" 
+        customActions={(record) => record.status === 'Dispatched' ? [{ label: 'Receive Goods', status: 'Received', icon: 'inventory', successMsg: 'Goods Received' }] : []}
       />
     </div>
   );

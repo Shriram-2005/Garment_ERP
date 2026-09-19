@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function MatrixModule() {
-  const schema = [{ key: 'styleCode', label: 'Style Code' }, { key: 'color', label: 'Color' }, { key: 'size', label: 'Size' }];
+  const schema = [{ key: 'styleCode', label: 'Style Code' }, { key: 'color', label: 'Color' }, { key: 'size', label: 'Size' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function MatrixModule() {
         moduleName="matrix" 
         schema={schema} 
         title="Size & Colour Matrix Records" 
+        customActions={(record) => record.status === 'Draft' ? [{ label: 'Lock Matrix', status: 'Locked', icon: 'lock', successMsg: 'Matrix Locked' }] : []}
       />
     </div>
   );

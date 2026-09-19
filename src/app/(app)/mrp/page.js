@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function MrpModule() {
-  const schema = [{ key: 'planId', label: 'Plan ID' }, { key: 'status', label: 'Status' }];
+  const schema = [{ key: 'planId', label: 'Plan ID' }, { key: 'status', label: 'Status' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function MrpModule() {
         moduleName="mrp" 
         schema={schema} 
         title="Material Requirement Records" 
+        customActions={(record) => record.status === 'Draft' ? [{ label: 'Submit for Approval', status: 'Pending Approval', icon: 'schedule', successMsg: 'Submitted for Approval' }] : record.status === 'Pending Approval' ? [{ label: 'Approve Plan', status: 'Approved', icon: 'check_circle', successMsg: 'Plan Approved' }] : []}
       />
     </div>
   );

@@ -1,0 +1,4 @@
+orderId,buyer,qty,deliveryDate,status
+1001,John Doe,100,2026-10-15,Pending
+1002,Jane Smith,200,2026-11-01,Completed
+1003,Bob Johnson,150,2026-12-10,In Progress

@@ -2,17 +2,20 @@
 
 import { useState, useEffect } from "react";
 import DataTable from "@/components/DataTable";
-import { getRecords } from "@/utils/dataStore";
+import { fetchRecords } from "@/app/actions/dataActions";
 
 export default function BOMModule() {
   const [schema, setSchema] = useState([]);
 
   useEffect(() => {
-    const masterRecords = getRecords("master");
-    const fabricRecords = getRecords("fabric");
-    const accRecords = getRecords("accessories");
+    async function loadData() {
+      const [masterRecords, fabricRecords, accRecords] = await Promise.all([
+        fetchRecords("master"),
+        fetchRecords("fabric"),
+        fetchRecords("accessories")
+      ]);
 
-    const dynamicSchema = [
+      const dynamicSchema = [
       { 
         key: "style", 
         label: "Product Style", 
@@ -39,8 +42,11 @@ export default function BOMModule() {
           : [{ value: "", label: "No Trims Found. Please add in Accessories." }]
       },
       { key: "accConsumption", label: "Trim Cons. (per pc)", type: "number" },
-    ];
-    setSchema(dynamicSchema);
+          , { key: "status", label: "Status", type: "text" }
+  ];
+      setSchema(dynamicSchema);
+    }
+    loadData();
   }, []);
 
   if (schema.length === 0) return null;
@@ -58,6 +64,7 @@ export default function BOMModule() {
         moduleName="bom" 
         schema={schema} 
         title="BOM Definitions" 
+        customActions={(record) => record.status === 'Draft' ? [{ label: 'Approve', status: 'Approved', icon: 'check_circle', successMsg: 'BOM Approved' }] : record.status === 'Approved' ? [{ label: 'Lock', status: 'Locked', icon: 'lock', successMsg: 'BOM Locked' }] : []}
       />
     </div>
   );

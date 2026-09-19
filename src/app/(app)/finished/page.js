@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function FinishedModule() {
-  const schema = [{ key: 'style', label: 'Style' }, { key: 'totalStock', label: 'Total Stock', type: 'number' }];
+  const schema = [{ key: 'style', label: 'Style' }, { key: 'totalStock', label: 'Total Stock', type: 'number' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function FinishedModule() {
         moduleName="finished" 
         schema={schema} 
         title="Finished Goods Records" 
+        customActions={(record) => record.status === 'In Stock' ? [{ label: 'Transfer to Retail', status: 'Transferred', icon: 'storefront', successMsg: 'Transferred to Retail' }, { label: 'Mark Sold Out', status: 'Sold Out', icon: 'remove_shopping_cart', successMsg: 'Marked Sold Out' }] : record.status === 'Transferred' ? [{ label: 'Mark Sold Out', status: 'Sold Out', icon: 'remove_shopping_cart', successMsg: 'Marked Sold Out' }] : []}
       />
     </div>
   );

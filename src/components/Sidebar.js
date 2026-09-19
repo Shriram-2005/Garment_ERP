@@ -1,31 +1,99 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
-export default function Sidebar({ isCollapsed }) {
+export default function Sidebar({ isCollapsed, toggleSidebar }) {
   const pathname = usePathname();
+  const [openCategories, setOpenCategories] = useState({
+    "Dashboard": true,
+    "Product Engineering": true
+  });
 
-  const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: "dashboard" },
-    { name: "Product Master", path: "/master", icon: "checkroom" },
-    { name: "Size & Colour", path: "/matrix", icon: "grid_on" },
-    { name: "Fabric Stock", path: "/fabric", icon: "inventory_2" },
-    { name: "Trims Stock", path: "/accessories", icon: "category" },
-    { name: "Purchase", path: "/purchase", icon: "shopping_cart" },
-    { name: "Bill of Materials", path: "/bom", icon: "receipt_long" },
-    { name: "Costing", path: "/costing", icon: "payments" },
-    { name: "Sales Order", path: "/sales", icon: "storefront" },
-    { name: "MRP", path: "/mrp", icon: "precision_manufacturing" },
-    { name: "Planning", path: "/planning", icon: "calendar_month" },
-    { name: "Cutting", path: "/cutting", icon: "content_cut" },
-    { name: "Bundle Mgmt", path: "/bundle", icon: "qr_code_2" },
-    { name: "Sewing", path: "/stitching", icon: "format_line_spacing" },
-    { name: "Job Work", path: "/jobwork", icon: "engineering" },
-    { name: "Finishing", path: "/finishing", icon: "dry_cleaning" },
-    { name: "Quality", path: "/quality", icon: "fact_check" },
-    { name: "Packing", path: "/packing", icon: "inventory" },
-    { name: "Finished Goods", path: "/finished", icon: "warehouse" },
-    { name: "Dispatch", path: "/dispatch", icon: "local_shipping" },
+  const categories = [
+    {
+      title: "Dashboard",
+      icon: "dashboard",
+      items: [
+        { name: "Overview", path: "/dashboard", icon: "monitoring" },
+        { name: "Analytics", path: "/dashboard/charts", icon: "analytics" },
+        { name: "Tracking", path: "/dashboard/tracking", icon: "linear_scale" },
+        { name: "Data Importing", path: "/dashboard/import", icon: "upload_file" }
+      ]
+    },
+    {
+      title: "Product Engineering",
+      icon: "architecture",
+      items: [
+        { name: "Product Master", path: "/master", icon: "checkroom" },
+        { name: "Size & Colour", path: "/matrix", icon: "grid_on" },
+        { name: "Bill of Materials", path: "/bom", icon: "receipt_long" },
+        { name: "Costing", path: "/costing", icon: "payments" }
+      ]
+    },
+    {
+      title: "Inventory & Sourcing",
+      icon: "inventory_2",
+      items: [
+        { name: "Fabric Stock", path: "/fabric", icon: "layers" },
+        { name: "Trims Stock", path: "/accessories", icon: "category" },
+        { name: "Purchase", path: "/purchase", icon: "shopping_cart" }
+      ]
+    },
+    {
+      title: "Sales & Planning",
+      icon: "trending_up",
+      items: [
+        { name: "Sales Order", path: "/sales", icon: "storefront" },
+        { name: "MRP", path: "/mrp", icon: "precision_manufacturing" },
+        { name: "Planning", path: "/planning", icon: "calendar_month" }
+      ]
+    },
+    {
+      title: "Production Floor",
+      icon: "factory",
+      items: [
+        { name: "Cutting", path: "/cutting", icon: "content_cut" },
+        { name: "Bundle Mgmt", path: "/bundle", icon: "qr_code_2" },
+        { name: "Sewing", path: "/stitching", icon: "format_line_spacing" },
+        { name: "Job Work", path: "/jobwork", icon: "engineering" },
+        { name: "Finishing", path: "/finishing", icon: "dry_cleaning" }
+      ]
+    },
+    {
+      title: "Logistics & QA",
+      icon: "local_shipping",
+      items: [
+        { name: "Quality", path: "/quality", icon: "fact_check" },
+        { name: "Packing", path: "/packing", icon: "inventory" },
+        { name: "Finished Goods", path: "/finished", icon: "warehouse" },
+        { name: "Dispatch", path: "/dispatch", icon: "flight_takeoff" }
+      ]
+    }
   ];
+
+  // Auto-expand category containing the active route
+  useEffect(() => {
+    if (isCollapsed) return;
+    categories.forEach(cat => {
+      if (cat.items.some(item => item.path === pathname)) {
+        setOpenCategories(prev => ({ ...prev, [cat.title]: true }));
+      }
+    });
+  }, [pathname, isCollapsed]);
+
+  const handleCategoryClick = (title) => {
+    if (isCollapsed && toggleSidebar) {
+      // If collapsed, open the sidebar AND open this category
+      toggleSidebar();
+      setOpenCategories(prev => ({ ...prev, [title]: true }));
+    } else {
+      // Normal toggle
+      setOpenCategories(prev => ({
+        ...prev,
+        [title]: !prev[title]
+      }));
+    }
+  };
 
   return (
     <aside style={{
@@ -48,7 +116,8 @@ export default function Sidebar({ isCollapsed }) {
         alignItems: 'center',
         justifyContent: isCollapsed ? 'center' : 'flex-start',
         gap: '12px',
-        borderBottom: '1px solid var(--border-color)'
+        borderBottom: '1px solid var(--border-color)',
+        minHeight: '80px'
       }}>
         <span className="material-symbols-outlined" style={{ color: 'var(--accent)', fontSize: '32px' }}>straighten</span>
         {!isCollapsed && (
@@ -56,34 +125,95 @@ export default function Sidebar({ isCollapsed }) {
         )}
       </div>
 
-      <nav style={{ padding: '24px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {navItems.map((item) => {
-          const isActive = pathname === item.path;
+      <nav style={{ padding: '16px 0', display: 'flex', flexDirection: 'column', gap: isCollapsed ? '16px' : '0' }}>
+        {categories.map((category) => {
+          const isOpen = openCategories[category.title];
+          const hasActiveItem = category.items.some(i => i.path === pathname);
+          
           return (
-            <Link href={item.path} key={item.path} style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: isCollapsed ? 'center' : 'flex-start',
-              gap: '16px',
-              padding: isCollapsed ? '12px 0' : '14px 24px',
-              backgroundColor: isActive ? 'var(--sidebar-hover)' : 'transparent',
-              color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-              transition: 'all 0.3s ease',
-              textDecoration: 'none',
-              borderLeft: isActive && !isCollapsed ? '3px solid var(--accent)' : '3px solid transparent'
-            }}
-            onMouseOver={(e) => { 
-              if(!isActive) e.currentTarget.style.color = 'var(--text-primary)'; 
-            }}
-            onMouseOut={(e) => { 
-              if(!isActive) e.currentTarget.style.color = 'var(--text-secondary)'; 
-            }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{item.icon}</span>
+            <div key={category.title} style={{ marginBottom: isCollapsed ? '0' : '8px' }}>
+              <div 
+                onClick={() => handleCategoryClick(category.title)}
+                title={isCollapsed ? category.title : ""}
+                style={{
+                  padding: isCollapsed ? '12px 0' : '12px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: isCollapsed ? 'center' : 'space-between',
+                  cursor: 'pointer',
+                  color: hasActiveItem ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  transition: 'color 0.3s ease',
+                  backgroundColor: isCollapsed && hasActiveItem ? 'var(--sidebar-hover)' : 'transparent',
+                  borderLeft: isCollapsed && hasActiveItem ? '3px solid var(--accent)' : '3px solid transparent'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.color = 'var(--accent)';
+                  if (isCollapsed) e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.color = hasActiveItem ? 'var(--text-primary)' : 'var(--text-secondary)';
+                  if (isCollapsed && !hasActiveItem) e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: isCollapsed ? 'center' : 'flex-start', width: '100%' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '22px', color: hasActiveItem ? 'var(--accent)' : 'inherit', transition: 'font-size 0.3s ease' }}>{category.icon}</span>
+                  {!isCollapsed && (
+                    <span style={{ fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                      {category.title}
+                    </span>
+                  )}
+                </div>
+                {!isCollapsed && (
+                  <span className="material-symbols-outlined" style={{ 
+                    fontSize: '18px', 
+                    transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.3s ease'
+                  }}>
+                    expand_more
+                  </span>
+                )}
+              </div>
+
               {!isCollapsed && (
-                <span style={{ fontSize: '11px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '1.5px' }}>{item.name}</span>
+                <div style={{ 
+                  height: isOpen ? 'auto' : '0px', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px'
+                }}>
+                  {category.items.map((item) => {
+                    const isActive = pathname === item.path;
+                    return (
+                      <Link href={item.path} key={item.path} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        gap: '16px',
+                        padding: '10px 24px 10px 54px',
+                        backgroundColor: 'transparent',
+                        color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
+                        transition: 'all 0.3s ease',
+                        textDecoration: 'none',
+                        borderLeft: isActive ? '3px solid var(--accent)' : '3px solid transparent'
+                      }}
+                      onMouseOver={(e) => { 
+                        if(!isActive) e.currentTarget.style.color = 'var(--text-primary)'; 
+                        if(!isActive) e.currentTarget.style.paddingLeft = '58px';
+                      }}
+                      onMouseOut={(e) => { 
+                        if(!isActive) e.currentTarget.style.color = 'var(--text-secondary)'; 
+                        if(!isActive) e.currentTarget.style.paddingLeft = '54px';
+                      }}
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{item.icon}</span>
+                        <span style={{ fontSize: '12px', fontWeight: '400', letterSpacing: '0.5px' }}>{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
-            </Link>
+            </div>
           );
         })}
       </nav>

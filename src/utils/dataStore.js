@@ -1,7 +1,13 @@
+import fs from 'fs';
+import path from 'path';
+
+const getFilePath = () => {
+  return path.join(process.cwd(), 'dataStore.json');
+};
+
 export const initializeStore = () => {
-  if (typeof window === "undefined") return;
-  const initialized = localStorage.getItem("erp_initialized_v2");
-  if (!initialized) {
+  const filePath = getFilePath();
+  if (!fs.existsSync(filePath)) {
     const defaultData = {
       master: [
         { id: "1", styleCode: "TS-001", category: "T-Shirt", season: "Summer 2026" },
@@ -103,30 +109,34 @@ export const initializeStore = () => {
       ]
     };
 
-    localStorage.setItem("erp_data", JSON.stringify(defaultData));
-    localStorage.setItem("erp_initialized_v2", "true");
+    fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
   }
 };
 
 export const getRecords = (moduleName) => {
-  if (typeof window === "undefined") return [];
-  const rawData = localStorage.getItem("erp_data");
+  const filePath = getFilePath();
+  if (!fs.existsSync(filePath)) return [];
+  const rawData = fs.readFileSync(filePath, 'utf-8');
   if (!rawData) return [];
   const data = JSON.parse(rawData);
   return data[moduleName] || [];
 };
 
 export const getAllData = () => {
-  if (typeof window === "undefined") return {};
-  const rawData = localStorage.getItem("erp_data");
+  const filePath = getFilePath();
+  if (!fs.existsSync(filePath)) return {};
+  const rawData = fs.readFileSync(filePath, 'utf-8');
   if (!rawData) return {};
   return JSON.parse(rawData);
 };
 
 export const addRecord = (moduleName, record) => {
-  if (typeof window === "undefined") return null;
-  const rawData = localStorage.getItem("erp_data");
-  let data = rawData ? JSON.parse(rawData) : {};
+  const filePath = getFilePath();
+  let data = {};
+  if (fs.existsSync(filePath)) {
+    const rawData = fs.readFileSync(filePath, 'utf-8');
+    if (rawData) data = JSON.parse(rawData);
+  }
   
   if (!data[moduleName]) {
     data[moduleName] = [];
@@ -138,13 +148,15 @@ export const addRecord = (moduleName, record) => {
   };
   
   data[moduleName].push(newRecord);
-  localStorage.setItem("erp_data", JSON.stringify(data));
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   return newRecord;
 };
 
 export const updateRecord = (moduleName, id, updatedRecord) => {
-  if (typeof window === "undefined") return null;
-  const rawData = localStorage.getItem("erp_data");
+  const filePath = getFilePath();
+  if (!fs.existsSync(filePath)) return null;
+  
+  const rawData = fs.readFileSync(filePath, 'utf-8');
   if (!rawData) return null;
   
   let data = JSON.parse(rawData);
@@ -154,19 +166,21 @@ export const updateRecord = (moduleName, id, updatedRecord) => {
   if (index === -1) return null;
 
   data[moduleName][index] = { ...data[moduleName][index], ...updatedRecord };
-  localStorage.setItem("erp_data", JSON.stringify(data));
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   return data[moduleName][index];
 };
 
 export const deleteRecord = (moduleName, id) => {
-  if (typeof window === "undefined") return false;
-  const rawData = localStorage.getItem("erp_data");
+  const filePath = getFilePath();
+  if (!fs.existsSync(filePath)) return false;
+  
+  const rawData = fs.readFileSync(filePath, 'utf-8');
   if (!rawData) return false;
   
   let data = JSON.parse(rawData);
   if (!data[moduleName]) return false;
 
   data[moduleName] = data[moduleName].filter(r => r.id !== id);
-  localStorage.setItem("erp_data", JSON.stringify(data));
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   return true;
 };

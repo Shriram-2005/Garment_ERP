@@ -3,25 +3,28 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
-import { initializeStore } from "@/utils/dataStore";
-import { supabase } from "@/utils/supabaseClient";
+import { initServerStore } from "@/app/actions/dataActions";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AppLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [theme, setTheme] = useState("dark");
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const supabase = createClient();
 
   useEffect(() => {
     setMounted(true);
-    initializeStore();
+    initServerStore();
     
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
+        setUser(session.user);
       } else {
         router.push("/login");
       }
@@ -31,8 +34,10 @@ export default function AppLayout({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         setIsAuthenticated(true);
+        setUser(session.user);
       } else {
         setIsAuthenticated(false);
+        setUser(null);
         router.push("/login");
       }
     });
@@ -71,9 +76,9 @@ export default function AppLayout({ children }) {
 
   return (
     <div className="app-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
-      <Sidebar isCollapsed={isSidebarCollapsed} />
+      <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
       <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <TopBar toggleTheme={toggleTheme} theme={theme} logout={logout} toggleSidebar={toggleSidebar} />
+        <TopBar toggleTheme={toggleTheme} theme={theme} logout={logout} toggleSidebar={toggleSidebar} user={user} />
         <main className="page-content" style={{ flex: 1, padding: '40px', overflowY: 'auto', fontFamily: 'var(--font-sans)' }}>
           {children}
         </main>

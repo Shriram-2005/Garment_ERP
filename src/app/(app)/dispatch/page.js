@@ -3,7 +3,8 @@
 import DataTable from "@/components/DataTable";
 
 export default function DispatchModule() {
-  const schema = [{ key: 'invoiceNo', label: 'Invoice No' }, { key: 'destination', label: 'Destination' }];
+  const schema = [{ key: 'invoiceNo', label: 'Invoice No' }, { key: 'destination', label: 'Destination' }    , { key: "status", label: "Status", type: "text" }
+  ];
 
   return (
     <div>
@@ -18,6 +19,7 @@ export default function DispatchModule() {
         moduleName="dispatch" 
         schema={schema} 
         title="Dispatch Records" 
+        customActions={(record) => record.status === 'Pending' ? [{ label: 'Ship Invoice', status: 'Shipped', icon: 'flight_takeoff', successMsg: 'Shipped' }] : record.status === 'Shipped' ? [{ label: 'Mark Delivered', status: 'Delivered', icon: 'where_to_vote', successMsg: 'Delivered' }] : []}
       />
     </div>
   );
