@@ -15,8 +15,8 @@ export async function getCompanyNameByEmail(email) {
     return { success: true, companyName: "Global Admin Company" };
   }
 
-  const supabaseAdmin = getAdminSupabase();
   try {
+    const supabaseAdmin = getAdminSupabase();
     const { data, error } = await supabaseAdmin
       .from('user_profiles')
       .select('company_name')
@@ -35,9 +35,8 @@ export async function getCompanyNameByEmail(email) {
 }
 
 export async function createEmployeeAccount(email, password, companyName, companyId, allowedModules) {
-  const supabaseAdmin = getAdminSupabase();
-
   try {
+    const supabaseAdmin = getAdminSupabase();
     // 1. Create the user in Auth
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: email,
@@ -66,8 +65,8 @@ export async function createEmployeeAccount(email, password, companyName, compan
 }
 
 export async function deleteEmployeeAccount(userId) {
-  const supabaseAdmin = getAdminSupabase();
   try {
+    const supabaseAdmin = getAdminSupabase();
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
     if (error) return { success: false, error: error.message };
     return { success: true };
