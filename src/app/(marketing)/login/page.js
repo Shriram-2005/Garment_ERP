@@ -42,7 +42,7 @@ export default function Login() {
         setStep(2);
       }
     } catch (err) {
-      setError("An error occurred. Please try again.");
+      setError("An error occurred: " + (err.message || err.toString()));
     } finally {
       setLoading(false);
     }
