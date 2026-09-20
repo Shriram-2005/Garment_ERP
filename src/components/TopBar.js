@@ -5,15 +5,14 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import { fetchRecords } from "@/app/actions/dataActions";
 import { useToast } from "@/components/ToastProvider";
+import { useProfile } from "@/components/ProfileProvider";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user }) {
-  const [isExporting, setIsExporting] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  
   const router = useRouter();
   const { notifications, markAllAsRead, addToast, deleteNotification } = useToast();
+  const { hasAccess } = useProfile();
   
   // Notification state
   const [showNotifications, setShowNotifications] = useState(false);
@@ -27,7 +26,21 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Background Stock Checker
+  const [profile, setProfile] = useState(null);
+
   useEffect(() => {
+    if (user?.email) {
+      const fetchProfile = async () => {
+        const { data } = await supabase.from('user_profiles').select('*').eq('email', user.email).single();
+        if (data) setProfile(data);
+      };
+      fetchProfile();
+    }
+  }, [user]);
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.role?.toUpperCase().includes('SUPER_ADMIN')) return; // No stock checking for Super Admin
+
     const checkStockLevels = async () => {
       try {
         const [fabricData, accData] = await Promise.all([
@@ -59,7 +72,10 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
     }, 1500);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [profile]);
+
+  const isAdmin = profile?.role?.toLowerCase().includes('admin');
+  const isSuperAdmin = profile?.role?.includes('SUPER_ADMIN');
 
   // Modules list
   const erpModules = [
@@ -82,7 +98,11 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
     { name: "Purchase Orders", path: "/purchase" },
     { name: "Finishing & Washing", path: "/finishing" },
     { name: "Size & Color Matrix", path: "/matrix" },
-    { name: "Data Importing", path: "/dashboard/import" }
+    { name: "Data Importing", path: "/dashboard/import" },
+    { name: "Complete Export", path: "/export/complete" },
+    { name: "Custom Export", path: "/export/custom" },
+    ...(isSuperAdmin ? [{ name: "Manage Companies", path: "/settings/companies" }] : []),
+    ...(isAdmin ? [{ name: "User Management", path: "/settings/users" }, { name: "System Settings", path: "/settings" }] : [])
   ];
 
   // Typewriter effect
@@ -120,9 +140,6 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
       if (!e.target.closest('.notification-container')) {
         setShowNotifications(false);
       }
-      if (!e.target.closest('.export-container')) {
-        setShowExportMenu(false);
-      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -133,140 +150,6 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
   const handleLogout = async () => {
     await supabase.auth.signOut();
     if (logout) logout();
-  };
-
-  const handleExport = async () => {
-    setIsExporting(true);
-    try {
-      const res = await fetch('/api/export');
-      if (!res.ok) throw new Error('Export failed');
-      
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = "erp_full_report.xlsx";
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      setShowExportMenu(false);
-    } catch (err) {
-      console.error(err);
-      addToast('Failed to export Excel report.', 'error');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleExportPDF = async () => {
-    setIsExporting(true);
-    setShowExportMenu(false);
-    try {
-      const doc = new jsPDF();
-      
-      const tables = [
-        { key: 'master', name: 'Product Master' }, { key: 'matrix', name: 'Size & Color Matrix' }, { key: 'bom', name: 'Bill of Materials' }, { key: 'costing', name: 'Costing' },
-        { key: 'fabric', name: 'Fabric Stock' }, { key: 'accessories', name: 'Accessories Stock' }, { key: 'purchase', name: 'Purchase Orders' },
-        { key: 'sales', name: 'Sales Orders' }, { key: 'mrp', name: 'MRP' }, { key: 'planning', name: 'Production Planning' },
-        { key: 'cutting', name: 'Cutting Floor' }, { key: 'bundle', name: 'Bundle Management' }, { key: 'stitching', name: 'Stitching Line' },
-        { key: 'jobwork', name: 'External Jobwork' }, { key: 'finishing', name: 'Finishing' }, { key: 'quality', name: 'Quality Inspection' },
-        { key: 'packing', name: 'Packing' }, { key: 'finished', name: 'Finished Goods' }, { key: 'dispatch', name: 'Dispatch Logistics' }
-      ];
-
-      // Fetch all data
-      const results = await Promise.all(tables.map(t => fetchRecords(t.key)));
-      const dataMap = {};
-      tables.forEach((t, index) => {
-        dataMap[t.key] = results[index] || [];
-      });
-
-      // Page 1 is reserved for Index. We will add a blank page for Index and start drawing on page 2.
-      // After all tables are drawn, we'll go back to page 1 and draw the index.
-      const indexMap = []; // { name: 'Fabric Stock', pageNumber: 2 }
-
-      // Skip page 1 (which will be the Index)
-      doc.addPage();
-      
-      let firstTable = true;
-      tables.forEach((t) => {
-        if (!firstTable) {
-          doc.addPage();
-        }
-        firstTable = false;
-
-        const data = dataMap[t.key];
-        const pageNumber = doc.internal.getNumberOfPages();
-        indexMap.push({ name: t.name, pageNumber });
-
-        // Add Header
-        doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.text(t.name.toUpperCase(), 14, 20);
-        
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Total Records: ${data.length}`, 14, 26);
-
-        if (data.length > 0) {
-          const headers = Object.keys(data[0]).filter(k => k !== 'id' && k !== 'created_at');
-          const body = data.map(row => headers.map(h => row[h] ? String(row[h]) : ""));
-
-          autoTable(doc, {
-            startY: 32,
-            head: [headers.map(h => h.toUpperCase())],
-            body: body,
-            theme: 'grid',
-            headStyles: { fillColor: [212, 175, 55], textColor: [0, 0, 0], fontStyle: 'bold' }, // D4AF37 Gold
-            styles: { fontSize: 8, cellPadding: 3, textColor: [50, 50, 50] },
-            alternateRowStyles: { fillColor: [250, 250, 250] },
-          });
-        } else {
-          doc.setFontSize(12);
-          doc.setTextColor(150, 150, 150);
-          doc.text("No records found.", 14, 40);
-        }
-      });
-
-      // Draw Index on Page 1
-      doc.setPage(1);
-      doc.setFontSize(22);
-      doc.setTextColor(0, 0, 0);
-      doc.text("GARMENT ERP - MASTER REPORT", 14, 20);
-      
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
-      
-      doc.setLineWidth(0.5);
-      doc.setDrawColor(212, 175, 55); // Gold line
-      doc.line(14, 32, 196, 32);
-
-      doc.setFontSize(16);
-      doc.setTextColor(0, 0, 0);
-      doc.text("INDEX", 14, 45);
-
-      const indexBody = indexMap.map((item, i) => [`${i + 1}. ${item.name}`, `Page ${item.pageNumber}`]);
-      
-      autoTable(doc, {
-        startY: 50,
-        body: indexBody,
-        theme: 'plain',
-        styles: { fontSize: 10, cellPadding: 2.5, textColor: [0, 0, 0] },
-        columnStyles: { 
-          0: { cellWidth: 'auto' }, 
-          1: { cellWidth: 30, halign: 'right', fontStyle: 'bold' } 
-        }
-      });
-
-      doc.save("erp_full_report.pdf");
-      addToast('PDF Report generated successfully!', 'success');
-    } catch (err) {
-      console.error(err);
-      addToast('Failed to generate PDF report.', 'error');
-    } finally {
-      setIsExporting(false);
-    }
   };
 
   const email = user?.email || "Admin User";
@@ -283,7 +166,9 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0 32px',
-      gap: '16px'
+      gap: '16px',
+      position: 'relative',
+      zIndex: 999
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <button 
@@ -344,37 +229,66 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
               {filteredModules.length > 0 ? (
                 <>
                   <div style={{ padding: '8px 16px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-secondary)' }}>Quick Navigation</div>
-                  {filteredModules.map((module, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        router.push(module.path);
-                        setIsSearchFocused(false);
-                        setSearchQuery("");
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '10px 16px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        background: 'transparent',
-                        border: 'none',
-                        color: 'var(--text-primary)',
-                        cursor: 'pointer',
-                        fontSize: '13px',
-                        textAlign: 'left',
-                        transition: 'background 0.2s ease'
-                      }}
-                      onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)'; e.currentTarget.style.color = 'var(--accent)'; }}
-                      onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>arrow_right_alt</span>
-                        {module.name}
-                      </div>
-                    </button>
-                  ))}
+                  {filteredModules.map((module, idx) => {
+                    const moduleKey = module.path.replace('/', '').split('/')[0] || 'dashboard';
+                    // Special logic: Custom Export / Complete Export / Import check 'export' or 'import' keys, or we just rely on if it's not a generic dashboard path. 
+                    // To simplify, if path is /dashboard/import, moduleKey is dashboard. 
+                    // Let's use exact path based matching for the special ones.
+                    let canAccess = true;
+                    if (module.path.startsWith('/export')) {
+                      // Exports allowed for all, but internal logic restricts. So we let them click.
+                      canAccess = true;
+                    } else if (module.path !== '/dashboard/import' && module.path !== '/dashboard') {
+                      canAccess = hasAccess(moduleKey);
+                    }
+
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          if (!canAccess) return;
+                          router.push(module.path);
+                          setIsSearchFocused(false);
+                          setSearchQuery("");
+                        }}
+                        disabled={!canAccess}
+                        style={{
+                          width: '100%',
+                          padding: '10px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: 'transparent',
+                          border: 'none',
+                          color: canAccess ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          cursor: canAccess ? 'pointer' : 'not-allowed',
+                          fontSize: '13px',
+                          textAlign: 'left',
+                          transition: 'background 0.2s ease',
+                          opacity: canAccess ? 1 : 0.5
+                        }}
+                        onMouseOver={(e) => { 
+                          if (canAccess) {
+                            e.currentTarget.style.backgroundColor = 'var(--sidebar-hover)'; 
+                            e.currentTarget.style.color = 'var(--accent)'; 
+                          }
+                        }}
+                        onMouseOut={(e) => { 
+                          if (canAccess) {
+                            e.currentTarget.style.backgroundColor = 'transparent'; 
+                            e.currentTarget.style.color = 'var(--text-primary)'; 
+                          }
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--text-secondary)' }}>
+                            {canAccess ? 'arrow_right_alt' : 'lock'}
+                          </span>
+                          {module.name}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </>
               ) : (
                 <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '12px' }}>
@@ -387,121 +301,6 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-        
-        {/* Export Dropdown */}
-        <div className="export-container" style={{ position: 'relative' }}>
-          <button 
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            disabled={isExporting}
-            style={{
-              padding: '10px 20px', 
-              backgroundColor: (isExporting || showExportMenu) ? 'transparent' : 'var(--text-primary)', 
-              color: (isExporting || showExportMenu) ? 'var(--text-secondary)' : 'var(--bg-primary)', 
-              border: '1px solid var(--text-primary)', 
-              textTransform: 'uppercase', 
-              letterSpacing: '2px', 
-              fontSize: '11px',
-              cursor: isExporting ? 'wait' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'all 0.3s ease',
-              borderRadius: '0'
-            }}
-            onMouseOver={(e) => { 
-              if(!isExporting && !showExportMenu) {
-                e.currentTarget.style.backgroundColor = 'transparent'; 
-                e.currentTarget.style.color = 'var(--text-primary)'; 
-              }
-            }}
-            onMouseOut={(e) => { 
-              if(!isExporting && !showExportMenu) {
-                e.currentTarget.style.backgroundColor = 'var(--text-primary)'; 
-                e.currentTarget.style.color = 'var(--bg-primary)'; 
-              }
-            }}
-            title="Export ERP Reports"
-          >
-            {isExporting ? (
-              <>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px', animation: 'spin 1s linear infinite' }}>sync</span>
-                Generating...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>download</span>
-                Export Report
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_drop_down</span>
-              </>
-            )}
-          </button>
-
-          {showExportMenu && (
-            <div style={{
-              position: 'absolute',
-              top: '45px',
-              right: 0,
-              width: '200px',
-              backgroundColor: 'var(--bg-primary)',
-              border: '1px solid var(--border-color)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              zIndex: 100,
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <button
-                onClick={handleExport}
-                style={{
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  background: 'transparent',
-                  border: 'none',
-                  borderBottom: '1px solid var(--border-color)',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  textAlign: 'left',
-                  transition: 'background 0.2s ease'
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.1)'; e.currentTarget.style.color = 'var(--accent)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>table_view</span>
-                Download Excel
-              </button>
-              
-              <button
-                onClick={handleExportPDF}
-                style={{
-                  padding: '12px 16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  textAlign: 'left',
-                  transition: 'background 0.2s ease'
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = 'rgba(212,175,55,0.1)'; e.currentTarget.style.color = 'var(--accent)'; }}
-                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>picture_as_pdf</span>
-                Download PDF
-              </button>
-            </div>
-          )}
-        </div>
-
-        <style>{`
-          @keyframes spin { 100% { transform: rotate(360deg); } }
-        `}</style>
-
         <button 
           onClick={toggleTheme}
           style={{
@@ -525,8 +324,10 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '11px', fontWeight: '500', textTransform: 'lowercase', letterSpacing: '1px', color: 'var(--text-primary)' }}>{email}</div>
-            <div style={{ fontSize: '10px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>{user?.user_metadata?.role || "System User"}</div>
+            <div style={{ fontSize: '11px', fontWeight: '500', textTransform: 'lowercase', letterSpacing: '1px', color: 'var(--text-primary)' }}>{user?.email || "No Email"}</div>
+            <div style={{ fontSize: '10px', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '1px', marginTop: '2px' }}>
+              {profile ? `${profile.role} · ${profile.company_name}` : "System User"}
+            </div>
           </div>
           <div style={{
             width: '36px',
@@ -541,7 +342,7 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
             fontWeight: '600',
             fontSize: '14px'
           }}>
-            {initial}
+            {user?.email ? user.email.substring(0, 2).toUpperCase() : "GE"}
           </div>
         </div>
 
@@ -663,7 +464,7 @@ export default function TopBar({ toggleTheme, theme, logout, toggleSidebar, user
         </div>
 
         <button 
-          onClick={handleLogout}
+          onClick={() => logout()}
           style={{ 
             padding: '10px 16px', 
             fontSize: '11px', 

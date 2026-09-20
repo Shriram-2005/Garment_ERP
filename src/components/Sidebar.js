@@ -1,85 +1,133 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useProfile } from "@/components/ProfileProvider";
 
 export default function Sidebar({ isCollapsed, toggleSidebar }) {
   const pathname = usePathname();
-  const [openCategories, setOpenCategories] = useState({
-    "Dashboard": true,
-    "Product Engineering": true
-  });
+  const { hasAccess, profile } = useProfile();
+  const [openCategories, setOpenCategories] = useState({});
 
-  const categories = [
-    {
-      title: "Dashboard",
-      icon: "dashboard",
+  const isSuperAdmin = profile?.role?.toUpperCase().includes('SUPER_ADMIN');
+  const isAdmin = profile?.role?.toLowerCase().includes('admin');
+
+  // Filter categories and items based on permissions
+  const filteredCategories = [];
+
+  if (isSuperAdmin) {
+    filteredCategories.push({
+      title: "Global Administration",
+      icon: "public",
       items: [
-        { name: "Overview", path: "/dashboard", icon: "monitoring" },
-        { name: "Analytics", path: "/dashboard/charts", icon: "analytics" },
-        { name: "Tracking", path: "/dashboard/tracking", icon: "linear_scale" },
-        { name: "Data Importing", path: "/dashboard/import", icon: "upload_file" }
+        { name: "Manage Companies", path: "/settings/companies", icon: "domain" }
       ]
-    },
-    {
-      title: "Product Engineering",
-      icon: "architecture",
-      items: [
-        { name: "Product Master", path: "/master", icon: "checkroom" },
-        { name: "Size & Colour", path: "/matrix", icon: "grid_on" },
-        { name: "Bill of Materials", path: "/bom", icon: "receipt_long" },
-        { name: "Costing", path: "/costing", icon: "payments" }
-      ]
-    },
-    {
-      title: "Inventory & Sourcing",
-      icon: "inventory_2",
-      items: [
-        { name: "Fabric Stock", path: "/fabric", icon: "layers" },
-        { name: "Trims Stock", path: "/accessories", icon: "category" },
-        { name: "Purchase", path: "/purchase", icon: "shopping_cart" }
-      ]
-    },
-    {
-      title: "Sales & Planning",
-      icon: "trending_up",
-      items: [
-        { name: "Sales Order", path: "/sales", icon: "storefront" },
-        { name: "MRP", path: "/mrp", icon: "precision_manufacturing" },
-        { name: "Planning", path: "/planning", icon: "calendar_month" }
-      ]
-    },
-    {
-      title: "Production Floor",
-      icon: "factory",
-      items: [
-        { name: "Cutting", path: "/cutting", icon: "content_cut" },
-        { name: "Bundle Mgmt", path: "/bundle", icon: "qr_code_2" },
-        { name: "Sewing", path: "/stitching", icon: "format_line_spacing" },
-        { name: "Job Work", path: "/jobwork", icon: "engineering" },
-        { name: "Finishing", path: "/finishing", icon: "dry_cleaning" }
-      ]
-    },
-    {
-      title: "Logistics & QA",
-      icon: "local_shipping",
-      items: [
-        { name: "Quality", path: "/quality", icon: "fact_check" },
-        { name: "Packing", path: "/packing", icon: "inventory" },
-        { name: "Finished Goods", path: "/finished", icon: "warehouse" },
-        { name: "Dispatch", path: "/dispatch", icon: "flight_takeoff" }
-      ]
-    }
-  ];
+    });
+  } else {
+    const categories = [
+      {
+        title: "Dashboard",
+        icon: "dashboard",
+        items: [
+          { name: "Overview", path: "/dashboard", icon: "monitoring" },
+          { name: "Analytics", path: "/dashboard/charts", icon: "analytics" },
+          { name: "Tracking", path: "/dashboard/tracking", icon: "linear_scale" },
+          { name: "Data Importing", path: "/dashboard/import", icon: "upload_file" }
+        ]
+      },
+      {
+        title: "Product Engineering",
+        icon: "architecture",
+        items: [
+          { name: "Product Master", path: "/master", icon: "checkroom" },
+          { name: "Size & Colour", path: "/matrix", icon: "grid_on" },
+          { name: "Bill of Materials", path: "/bom", icon: "receipt_long" },
+          { name: "Costing", path: "/costing", icon: "payments" }
+        ]
+      },
+      {
+        title: "Inventory & Sourcing",
+        icon: "inventory_2",
+        items: [
+          { name: "Fabric Stock", path: "/fabric", icon: "layers" },
+          { name: "Trims Stock", path: "/accessories", icon: "category" },
+          { name: "Purchase", path: "/purchase", icon: "shopping_cart" }
+        ]
+      },
+      {
+        title: "Sales & Planning",
+        icon: "trending_up",
+        items: [
+          { name: "Sales Order", path: "/sales", icon: "storefront" },
+          { name: "MRP", path: "/mrp", icon: "precision_manufacturing" },
+          { name: "Planning", path: "/planning", icon: "calendar_month" }
+        ]
+      },
+      {
+        title: "Production Floor",
+        icon: "factory",
+        items: [
+          { name: "Cutting", path: "/cutting", icon: "content_cut" },
+          { name: "Bundle Mgmt", path: "/bundle", icon: "qr_code_2" },
+          { name: "Sewing", path: "/stitching", icon: "format_line_spacing" },
+          { name: "Job Work", path: "/jobwork", icon: "engineering" },
+          { name: "Finishing", path: "/finishing", icon: "dry_cleaning" }
+        ]
+      },
+      {
+        title: "Logistics & QA",
+        icon: "local_shipping",
+        items: [
+          { name: "Quality", path: "/quality", icon: "fact_check" },
+          { name: "Packing", path: "/packing", icon: "inventory" },
+          { name: "Finished Goods", path: "/finished", icon: "warehouse" },
+          { name: "Dispatch", path: "/dispatch", icon: "flight_takeoff" }
+        ]
+      },
+      {
+        title: "Export & Reports",
+        icon: "file_download",
+        items: [
+          { name: "Complete Export", path: "/export/complete", icon: "inventory_2" },
+          { name: "Custom Export", path: "/export/custom", icon: "tune" }
+        ]
+      },
+      {
+        title: "System Settings",
+        icon: "settings",
+        adminOnly: true,
+        items: [
+          { name: "User Management", path: "/settings/users", icon: "manage_accounts" }
+        ]
+      }
+    ];
+
+    categories.forEach(cat => {
+      if (cat.adminOnly && !isAdmin) return;
+
+      if (cat.title === "Dashboard" || cat.title === "Export & Reports" || cat.title === "System Settings") {
+        filteredCategories.push(cat);
+      } else {
+        const allowedItems = cat.items.filter(item => {
+          const moduleName = item.path.split('/')[1]; // e.g. "sales"
+          return hasAccess(moduleName);
+        });
+        
+        if (allowedItems.length > 0) {
+          filteredCategories.push({ ...cat, items: allowedItems });
+        }
+      }
+    });
+  }
 
   // Auto-expand category containing the active route
   useEffect(() => {
     if (isCollapsed) return;
-    categories.forEach(cat => {
+    filteredCategories.forEach(cat => {
       if (cat.items.some(item => item.path === pathname)) {
         setOpenCategories(prev => ({ ...prev, [cat.title]: true }));
       }
     });
-  }, [pathname, isCollapsed]);
+  }, [pathname, isCollapsed, profile]);
 
   const handleCategoryClick = (title) => {
     if (isCollapsed && toggleSidebar) {
@@ -125,10 +173,10 @@ export default function Sidebar({ isCollapsed, toggleSidebar }) {
         )}
       </div>
 
-      <nav style={{ padding: '16px 0', display: 'flex', flexDirection: 'column', gap: isCollapsed ? '16px' : '0' }}>
-        {categories.map((category) => {
+      <nav style={{ flex: 1, padding: '24px 16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {filteredCategories.map((category, index) => {
           const isOpen = openCategories[category.title];
-          const hasActiveItem = category.items.some(i => i.path === pathname);
+          const hasActiveItem = category.items.some(item => item.path === pathname);
           
           return (
             <div key={category.title} style={{ marginBottom: isCollapsed ? '0' : '8px' }}>

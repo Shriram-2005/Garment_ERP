@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import { fetchRecords } from "@/app/actions/dataActions";
 import { useRouter } from "next/navigation";
+import { useProfile } from "@/components/ProfileProvider";
 
 export default function PipelineTracking() {
   const router = useRouter();
-  const [selectedModule, setSelectedModule] = useState("sales");
+  const { hasAccess } = useProfile();
+  
   const [trackingData, setTrackingData] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const modulesWithStatus = [
@@ -21,10 +22,17 @@ export default function PipelineTracking() {
     { key: 'finishing', label: 'Finishing Process' },
     { key: 'packing', label: 'Packing Sequence' },
     { key: 'dispatch', label: 'Dispatch Pipeline' }
-  ];
+  ].filter(m => hasAccess(m.key));
+
+  const [selectedModule, setSelectedModule] = useState(modulesWithStatus.length > 0 ? modulesWithStatus[0].key : "");
 
   useEffect(() => {
     const loadTracking = async () => {
+      if (!selectedModule) {
+        setTrackingData([]);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const moduleRecords = await fetchRecords(selectedModule);
       setTrackingData(moduleRecords || []);
@@ -70,11 +78,11 @@ export default function PipelineTracking() {
               onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--border-highlight)'}
               onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-color)'}
             >
-              {modulesWithStatus.find(m => m.key === selectedModule)?.label}
+              {selectedModule ? modulesWithStatus.find(m => m.key === selectedModule)?.label : 'No access to pipelines'}
               <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--accent)', transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}>expand_more</span>
             </button>
             
-            {isDropdownOpen && (
+            {isDropdownOpen && modulesWithStatus.length > 0 && (
               <>
                 <div 
                   onClick={() => setIsDropdownOpen(false)} 

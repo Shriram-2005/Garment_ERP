@@ -4,6 +4,7 @@ import { useState } from "react";
 import Papa from "papaparse";
 import { createRecordsBatch } from "@/app/actions/dataActions";
 import { useToast } from "@/components/ToastProvider";
+import { useProfile } from "@/components/ProfileProvider";
 
 const moduleSchemas = {
   master: ['styleCode', 'category', 'season'],
@@ -28,17 +29,8 @@ const moduleSchemas = {
 };
 
 export default function DataImporting() {
-  const [selectedModule, setSelectedModule] = useState("sales");
-  const [importMethod, setImportMethod] = useState("csv");
-  const [parsedData, setParsedData] = useState(null);
-  const [headers, setHeaders] = useState([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isModuleDropdownOpen, setIsModuleDropdownOpen] = useState(false);
-  const [isMethodDropdownOpen, setIsMethodDropdownOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [validationErrors, setValidationErrors] = useState([]);
-  const rowsPerPage = 10;
   const { addToast } = useToast();
+  const { hasAccess } = useProfile();
 
   const modules = [
     { key: 'master', label: 'Product Master' },
@@ -53,7 +45,18 @@ export default function DataImporting() {
     { key: 'dispatch', label: 'Dispatch' },
     { key: 'quality', label: 'Quality Control' },
     { key: 'costing', label: 'Costing' }
-  ];
+  ].filter(m => hasAccess(m.key));
+
+  const [selectedModule, setSelectedModule] = useState(modules.length > 0 ? modules[0].key : "");
+  const [importMethod, setImportMethod] = useState("csv");
+  const [parsedData, setParsedData] = useState(null);
+  const [headers, setHeaders] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isModuleDropdownOpen, setIsModuleDropdownOpen] = useState(false);
+  const [isMethodDropdownOpen, setIsMethodDropdownOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [validationErrors, setValidationErrors] = useState([]);
+  const rowsPerPage = 10;
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];

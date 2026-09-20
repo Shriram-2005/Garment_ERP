@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
 import { initServerStore } from "@/app/actions/dataActions";
 import { createClient } from "@/utils/supabase/client";
+import { ProfileProvider } from "@/components/ProfileProvider";
 
 export default function AppLayout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -66,23 +67,27 @@ export default function AppLayout({ children }) {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
     localStorage.removeItem("auth");
+    localStorage.removeItem("erp_notifications");
     router.push("/login");
   };
 
   if (!mounted || !isAuthenticated) return null;
 
   return (
-    <div className="app-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
-      <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
-      <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <TopBar toggleTheme={toggleTheme} theme={theme} logout={logout} toggleSidebar={toggleSidebar} user={user} />
-        <main className="page-content" style={{ flex: 1, padding: '40px', overflowY: 'auto', fontFamily: 'var(--font-sans)' }}>
-          {children}
-        </main>
+    <ProfileProvider user={user}>
+      <div className="app-container" style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-primary)' }}>
+        <Sidebar isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
+        <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <TopBar toggleTheme={toggleTheme} theme={theme} logout={logout} toggleSidebar={toggleSidebar} user={user} />
+          <main className="page-content" style={{ flex: 1, padding: '40px', overflowY: 'auto', fontFamily: 'var(--font-sans)' }}>
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </ProfileProvider>
   );
 }
