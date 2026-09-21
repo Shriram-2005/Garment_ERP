@@ -5,6 +5,7 @@ import { fetchAllData } from "@/app/actions/dataActions";
 import { motion } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend } from 'recharts';
 import { useProfile } from "@/components/ProfileProvider";
+import AIInsightsWidget from "@/components/AIInsightsWidget";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -106,13 +107,29 @@ export default function Dashboard() {
     return null;
   };
 
+  // Compile dashboard data for AI insights
+  const dashboardData = {
+    kpis,
+    salesData,
+    inventoryData,
+    productionData: { totalCut, totalStitch, totalQC, totalPacked }
+  };
+
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show">
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="page-content" style={{ padding: '32px' }}>
       <motion.div variants={itemVariants} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', borderBottom: '1px solid rgba(212, 175, 55, 0.3)', paddingBottom: '24px' }}>
         <div>
           <p style={{ color: '#D4AF37', textTransform: 'uppercase', letterSpacing: '3px', fontSize: '11px', marginBottom: '8px' }}>Executive Analytics</p>
           <h1 style={{ fontSize: '3rem', fontWeight: '400', margin: 0 }}>Dashboard</h1>
         </div>
+        <button className="btn" style={{ display: 'flex', alignItems: 'center', gap: '8px', borderColor: 'var(--accent)', color: 'var(--accent)' }}>
+          <span className="material-symbols-outlined">download</span>
+          Export Report
+        </button>
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <AIInsightsWidget dashboardData={dashboardData} />
       </motion.div>
 
       {/* KPI Grid */}

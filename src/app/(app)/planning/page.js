@@ -61,6 +61,31 @@ export default function PlanningModule() {
     }
   };
 
+  const handleAutoSchedule = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/ai/schedule', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      
+      if (data.error) {
+        addToast(data.error, "error");
+      } else if (data.message) {
+        addToast(data.message, "info");
+      } else if (data.schedule) {
+        addToast(`Successfully optimized ${data.schedule.length} orders!`, "success");
+        // We could apply these optimizations to the db or state here.
+        // For now, we will simply reload to see any changes if we had applied them.
+        loadSalesOrders();
+      }
+    } catch (err) {
+      addToast("Failed to run AI schedule", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Ensure these match exact status values for drag and drop
   const columns = [
     { title: "Pending", status: "Pending" },
@@ -78,20 +103,45 @@ export default function PlanningModule() {
           <h1 style={{ fontSize: '3rem', fontWeight: '400', margin: 0 }}>Production Planning</h1>
         </div>
         
-        {/* View Toggle */}
-        <div style={{ display: 'flex', backgroundColor: 'var(--bg-secondary)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+        {/* Actions & View Toggle */}
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <button 
-            onClick={() => setViewMode('table')}
-            style={{ padding: '8px 16px', background: viewMode === 'table' ? 'var(--text-primary)' : 'transparent', color: viewMode === 'table' ? 'var(--bg-primary)' : 'var(--text-secondary)', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s' }}
+            onClick={handleAutoSchedule}
+            disabled={loading}
+            style={{ 
+              padding: '8px 16px', 
+              background: 'linear-gradient(45deg, var(--accent), #e9c46a)', 
+              color: '#000', 
+              border: 'none', 
+              borderRadius: '6px', 
+              cursor: loading ? 'not-allowed' : 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              fontSize: '12px', 
+              fontWeight: '600', 
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 10px rgba(212, 175, 55, 0.3)'
+            }}
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>table_rows</span> Table View
+            <span className="material-symbols-outlined" style={{ fontSize: '16px', animation: loading ? 'spin 2s linear infinite' : 'none' }}>auto_awesome</span> 
+            {loading ? 'Optimizing...' : 'AI Auto-Schedule'}
           </button>
-          <button 
-            onClick={() => setViewMode('kanban')}
-            style={{ padding: '8px 16px', background: viewMode === 'kanban' ? 'var(--text-primary)' : 'transparent', color: viewMode === 'kanban' ? 'var(--bg-primary)' : 'var(--text-secondary)', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s' }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>view_kanban</span> Kanban Board
-          </button>
+          
+          <div style={{ display: 'flex', backgroundColor: 'var(--bg-secondary)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <button 
+              onClick={() => setViewMode('table')}
+              style={{ padding: '8px 16px', background: viewMode === 'table' ? 'var(--text-primary)' : 'transparent', color: viewMode === 'table' ? 'var(--bg-primary)' : 'var(--text-secondary)', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>table_rows</span> Table View
+            </button>
+            <button 
+              onClick={() => setViewMode('kanban')}
+              style={{ padding: '8px 16px', background: viewMode === 'kanban' ? 'var(--text-primary)' : 'transparent', color: viewMode === 'kanban' ? 'var(--bg-primary)' : 'var(--text-secondary)', border: 'none', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: '500', transition: 'all 0.2s' }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>view_kanban</span> Kanban Board
+            </button>
+          </div>
         </div>
       </div>
 

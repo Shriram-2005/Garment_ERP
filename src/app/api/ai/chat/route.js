@@ -24,7 +24,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
-    const { message, history } = await req.json();
+    const { message, history, fileData } = await req.json();
 
     const isSuperAdmin = profile.role.toUpperCase().includes('SUPER_ADMIN');
     const companyContext = isSuperAdmin 
@@ -42,8 +42,10 @@ export async function POST(req) {
       2. If the user asks for data from a module they do NOT have access to, you MUST politely refuse and state that they do not have the required permissions.
       3. Do NOT invent or hallucinate data.
 
-      You are capable of viewing inventory, creating orders, and tracking production.
-      (Note: Specific tools for these actions are currently being integrated. For now, acknowledge their request and state that you are actively being connected to the database tools.)
+      CAPABILITIES:
+      - You can view inventory, create orders, and track production (using the provided tools).
+      - If the user attaches an image or PDF of a Purchase Order/Invoice, you MUST visually extract the client name, product types, and quantities.
+      - Automatically formulate the extracted data into a structured response, and if appropriate, invoke the \`create_sales_order\` tool using that data, asking the user for confirmation if any data is missing.
     `;
 
     // Convert history format to Gemini format
@@ -93,7 +95,23 @@ export async function POST(req) {
       history: formattedHistory,
     });
 
-    const result = await chat.sendMessage(message);
+    let msgParts = [];
+    if (message) {
+      msgParts.push(message);
+    } else if (!message && fileData) {
+      msgParts.push("Please analyze this document.");
+    }
+
+    if (fileData) {
+      msgParts.push({
+        inlineData: {
+          data: fileData.data,
+          mimeType: fileData.mimeType
+        }
+      });
+    }
+
+    const result = await chat.sendMessage(msgParts);
     let response = await result.response;
     
     // Handle function calls

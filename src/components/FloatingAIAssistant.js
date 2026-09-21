@@ -4,14 +4,33 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
 import ReactMarkdown from 'react-markdown';
+import { useProfile } from '@/components/ProfileProvider';
 
 export default function FloatingAIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(null);
+  const [fileData, setFileData] = useState(null);
   const messagesEndRef = useRef(null);
   const supabase = createClient();
+  const { profile } = useProfile();
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFileData({
+          mimeType: selectedFile.type,
+          data: reader.result.split(',')[1] // Get base64 string without data prefix
+        });
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
 
   useEffect(() => {
     // Welcome message
@@ -30,11 +49,22 @@ export default function FloatingAIAssistant() {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if ((!input.trim() && !fileData) || loading) return;
 
     const userMessage = input;
+    const currentFileData = fileData;
+    const currentFile = file;
+    
     setInput("");
-    setMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    setFile(null);
+    setFileData(null);
+
+    let messageObj = { role: "user", content: userMessage };
+    if (currentFile) {
+      messageObj.content = userMessage ? `[Attached: ${currentFile.name}] ${userMessage}` : `[Attached: ${currentFile.name}]`;
+    }
+
+    setMessages(prev => [...prev, messageObj]);
     setLoading(true);
 
     try {
@@ -51,7 +81,11 @@ export default function FloatingAIAssistant() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${session?.access_token}`
         },
-        body: JSON.stringify({ message: userMessage, history: apiHistory }),
+        body: JSON.stringify({ 
+          message: userMessage, 
+          history: apiHistory,
+          fileData: currentFileData
+        }),
       });
 
       const data = await response.json();
@@ -63,11 +97,20 @@ export default function FloatingAIAssistant() {
       setMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
     } catch (err) {
       console.error(err);
-      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I encountered an error while processing your request." }]);
+      let errorMessage = "Sorry, I encountered an error while processing your request.";
+      if (err.message && (err.message.includes('429') || err.message.includes('Too Many Requests') || err.message.includes('503') || err.message.includes('high demand'))) {
+        errorMessage = "The AI model is currently experiencing high traffic. Please wait a few moments and try your request again.";
+      }
+      setMessages(prev => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Hide AI assistant for SUPER_ADMIN
+  if (profile?.role?.toUpperCase().includes('SUPER_ADMIN')) {
+    return null;
+  }
 
   return (
     <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 9999 }}>
@@ -155,7 +198,40 @@ export default function FloatingAIAssistant() {
 
             {/* Input Area */}
             <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
+              {file && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>attach_file</span>
+                  {file.name}
+                  <button onClick={() => { setFile(null); setFileData(null); }} style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', padding: 0 }}>
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>close</span>
+                  </button>
+                </div>
+              )}
               <form onSubmit={handleSend} style={{ display: 'flex', gap: '10px' }}>
+                <input 
+                  type="file"
+                  id="ai-file-upload"
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                  accept="image/*,application/pdf"
+                />
+                <label 
+                  htmlFor="ai-file-upload"
+                  style={{
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '50%',
+                    width: '46px',
+                    height: '46px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>attach_file</span>
+                </label>
                 <input 
                   type="text" 
                   value={input}
@@ -173,7 +249,7 @@ export default function FloatingAIAssistant() {
                 />
                 <button 
                   type="submit"
-                  disabled={loading || !input.trim()}
+                  disabled={loading || (!input.trim() && !fileData)}
                   style={{
                     backgroundColor: 'var(--accent)',
                     color: '#000',
@@ -184,8 +260,8 @@ export default function FloatingAIAssistant() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
-                    opacity: loading || !input.trim() ? 0.5 : 1
+                    cursor: loading || (!input.trim() && !fileData) ? 'not-allowed' : 'pointer',
+                    opacity: loading || (!input.trim() && !fileData) ? 0.5 : 1
                   }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>send</span>
