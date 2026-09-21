@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import TopBar from "@/components/TopBar";
+import FloatingAIAssistant from "@/components/FloatingAIAssistant";
 import { initServerStore } from "@/app/actions/dataActions";
 import { createClient } from "@/utils/supabase/client";
 import { ProfileProvider } from "@/components/ProfileProvider";
@@ -87,6 +88,7 @@ export default function AppLayout({ children }) {
             {children}
           </main>
         </div>
+        <FloatingAIAssistant />
       </div>
     </ProfileProvider>
   );
