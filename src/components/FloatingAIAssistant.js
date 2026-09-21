@@ -86,49 +86,48 @@ export default function FloatingAIAssistant() {
               right: '0',
               width: '380px',
               height: '500px',
-              backgroundColor: 'rgba(25, 27, 31, 0.7)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(212, 175, 55, 0.3)',
-              borderRadius: '20px',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
               display: 'flex',
               flexDirection: 'column',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              boxShadow: 'var(--card-shadow)',
               overflow: 'hidden'
             }}
           >
             {/* Header */}
             <div style={{ 
               padding: '16px 20px', 
-              borderBottom: '1px solid rgba(212, 175, 55, 0.2)',
+              borderBottom: '1px solid var(--border-color)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              background: 'linear-gradient(to right, rgba(212,175,55,0.1), rgba(212,175,55,0.05))'
+              backgroundColor: 'var(--bg-tertiary)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span className="material-symbols-outlined" style={{ color: '#D4AF37' }}>auto_awesome</span>
-                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', color: '#FFF' }}>Garment AI</span>
+                <span className="material-symbols-outlined" style={{ color: 'var(--accent)' }}>auto_awesome</span>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.2rem', color: 'var(--text-primary)' }}>Garment AI</span>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#aaa', cursor: 'pointer', display: 'flex' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex' }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
               </button>
             </div>
 
             {/* Chat Area */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px', backgroundColor: 'var(--bg-primary)' }}>
               {messages.map((msg, idx) => (
                 <div key={idx} style={{ 
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  backgroundColor: msg.role === 'user' ? '#D4AF37' : 'rgba(255,255,255,0.1)',
-                  color: msg.role === 'user' ? '#000' : '#FFF',
+                  backgroundColor: msg.role === 'user' ? 'var(--accent)' : 'var(--bg-secondary)',
+                  color: msg.role === 'user' ? '#000' : 'var(--text-primary)',
                   padding: '12px 16px',
                   borderRadius: '16px',
                   borderBottomRightRadius: msg.role === 'user' ? '4px' : '16px',
                   borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : '16px',
+                  border: msg.role === 'assistant' ? '1px solid var(--border-color)' : 'none',
                   maxWidth: '85%',
                   fontSize: '0.95rem',
                   lineHeight: '1.4'
@@ -137,7 +136,7 @@ export default function FloatingAIAssistant() {
                 </div>
               ))}
               {loading && (
-                <div style={{ alignSelf: 'flex-start', color: '#D4AF37', fontSize: '0.9rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ alignSelf: 'flex-start', color: 'var(--accent)', fontSize: '0.9rem', fontStyle: 'italic', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="material-symbols-outlined" style={{ animation: 'spin 2s linear infinite', fontSize: '18px' }}>sync</span>
                   Thinking...
                 </div>
@@ -146,7 +145,7 @@ export default function FloatingAIAssistant() {
             </div>
 
             {/* Input Area */}
-            <div style={{ padding: '16px', borderTop: '1px solid rgba(212, 175, 55, 0.2)' }}>
+            <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)' }}>
               <form onSubmit={handleSend} style={{ display: 'flex', gap: '10px' }}>
                 <input 
                   type="text" 
@@ -155,11 +154,11 @@ export default function FloatingAIAssistant() {
                   placeholder="Ask me anything..."
                   style={{ 
                     flex: 1, 
-                    backgroundColor: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(212, 175, 55, 0.3)',
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border-color)',
                     borderRadius: '24px',
                     padding: '12px 16px',
-                    color: '#FFF',
+                    color: 'var(--text-primary)',
                     outline: 'none'
                   }}
                 />
@@ -167,7 +166,7 @@ export default function FloatingAIAssistant() {
                   type="submit"
                   disabled={loading || !input.trim()}
                   style={{
-                    backgroundColor: '#D4AF37',
+                    backgroundColor: 'var(--accent)',
                     color: '#000',
                     border: 'none',
                     borderRadius: '50%',
@@ -195,9 +194,9 @@ export default function FloatingAIAssistant() {
           width: '60px',
           height: '60px',
           borderRadius: '50%',
-          backgroundColor: '#D4AF37',
+          backgroundColor: 'var(--accent)',
           border: 'none',
-          boxShadow: '0 4px 20px rgba(212, 175, 55, 0.4)',
+          boxShadow: 'var(--card-shadow)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',

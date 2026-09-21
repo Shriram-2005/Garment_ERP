@@ -79,7 +79,7 @@ export async function POST(req) {
     ];
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.5-flash',
       systemInstruction: systemPrompt,
       tools: tools
     });
@@ -152,6 +152,6 @@ export async function POST(req) {
 
   } catch (error) {
     console.error('AI Chat API Error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
