@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/utils/supabase/client";
+import ReactMarkdown from 'react-markdown';
 
 export default function FloatingAIAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -132,7 +133,15 @@ export default function FloatingAIAssistant() {
                   fontSize: '0.95rem',
                   lineHeight: '1.4'
                 }}>
-                  {msg.content}
+                  <ReactMarkdown
+                    components={{
+                      p: ({node, ...props}) => <p style={{margin: '0 0 8px 0'}} {...props} />,
+                      a: ({node, ...props}) => <a style={{color: msg.role === 'user' ? '#000' : 'var(--accent)', textDecoration: 'underline'}} {...props} />,
+                      strong: ({node, ...props}) => <strong style={{fontWeight: 600}} {...props} />,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
               ))}
               {loading && (

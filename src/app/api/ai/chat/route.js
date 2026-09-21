@@ -26,14 +26,19 @@ export async function POST(req) {
 
     const { message, history } = await req.json();
 
+    const isSuperAdmin = profile.role.toUpperCase().includes('SUPER_ADMIN');
+    const companyContext = isSuperAdmin 
+      ? `You are talking to a SUPER_ADMIN. They have global access to ALL companies and ALL data across the entire ERP system.`
+      : `You are talking to a user who belongs to the company "${profile.company_name}".`;
+
     // Construct Context-Aware System Prompt
     const systemPrompt = `
       You are Garment AI, an intelligent assistant built directly into an advanced Garment/Textile ERP system.
-      You are talking to a user who belongs to the company "${profile.company_name}".
+      ${companyContext}
       Their role/access level is: ${profile.role}.
 
       CRITICAL SECURITY RULES (RBAC):
-      1. You must ONLY provide information and take actions that fall within the user's allowed role modules: ${profile.role}.
+      1. ${isSuperAdmin ? "The user is a SUPER_ADMIN and has full access to all modules and all companies." : `You must ONLY provide information and take actions that fall within the user's allowed role modules: ${profile.role}.`}
       2. If the user asks for data from a module they do NOT have access to, you MUST politely refuse and state that they do not have the required permissions.
       3. Do NOT invent or hallucinate data.
 
