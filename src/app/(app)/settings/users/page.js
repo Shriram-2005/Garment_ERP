@@ -264,25 +264,25 @@ export default function UserManagement() {
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                       <button
                         onClick={() => handleOpenEditModal(user)}
-                        disabled={user.email === 'admin@companya.com' || actionLoading}
-                        style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px', borderRadius: '4px', cursor: user.email === 'admin@companya.com' ? 'not-allowed' : 'pointer', opacity: user.email === 'admin@companya.com' ? 0.3 : 1 }}
-                        title="Edit Permissions"
+                        disabled={isAdmin(user.role) || actionLoading}
+                        style={{ background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-primary)', padding: '6px', borderRadius: '4px', cursor: isAdmin(user.role) ? 'not-allowed' : 'pointer', opacity: isAdmin(user.role) ? 0.3 : 1 }}
+                        title={isAdmin(user.role) ? "Admins cannot be edited here" : "Edit Permissions"}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
                       </button>
                       <button
                         onClick={() => handleSuspend(user.id)}
-                        disabled={user.email === 'admin@companya.com' || user.role === 'SUSPENDED' || actionLoading}
-                        style={{ background: 'transparent', border: '1px solid var(--border-color)', color: '#FFB703', padding: '6px', borderRadius: '4px', cursor: (user.email === 'admin@companya.com' || user.role === 'SUSPENDED') ? 'not-allowed' : 'pointer', opacity: (user.email === 'admin@companya.com' || user.role === 'SUSPENDED') ? 0.3 : 1 }}
-                        title="Suspend User"
+                        disabled={isAdmin(user.role) || user.role === 'SUSPENDED' || actionLoading}
+                        style={{ background: 'transparent', border: '1px solid var(--border-color)', color: '#FFB703', padding: '6px', borderRadius: '4px', cursor: (isAdmin(user.role) || user.role === 'SUSPENDED') ? 'not-allowed' : 'pointer', opacity: (isAdmin(user.role) || user.role === 'SUSPENDED') ? 0.3 : 1 }}
+                        title={isAdmin(user.role) ? "Admins cannot be suspended" : "Suspend User"}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>block</span>
                       </button>
                       <button
                         onClick={() => handleDelete(user.id)}
-                        disabled={user.email === 'admin@companya.com' || actionLoading}
-                        style={{ background: 'transparent', border: '1px solid var(--border-color)', color: '#E63946', padding: '6px', borderRadius: '4px', cursor: user.email === 'admin@companya.com' ? 'not-allowed' : 'pointer', opacity: user.email === 'admin@companya.com' ? 0.3 : 1 }}
-                        title="Delete User"
+                        disabled={isAdmin(user.role) || actionLoading}
+                        style={{ background: 'transparent', border: '1px solid var(--border-color)', color: '#E63946', padding: '6px', borderRadius: '4px', cursor: isAdmin(user.role) ? 'not-allowed' : 'pointer', opacity: isAdmin(user.role) ? 0.3 : 1 }}
+                        title={isAdmin(user.role) ? "Admins cannot be deleted" : "Delete User"}
                       >
                         <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>delete</span>
                       </button>
